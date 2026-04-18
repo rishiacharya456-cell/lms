@@ -1,0 +1,219 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Take Attendance</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100">
+
+<!-- 🔷 HEADER -->
+<div class="bg-indigo-700 text-white p-4 shadow">
+    <div class="max-w-6xl mx-auto flex justify-between items-center">
+
+        <div class="flex items-center gap-3">
+            <img src="{% static 'images/logo.png' %}" 
+                 class="w-12 h-12 rounded bg-white p-1">
+
+            <div>
+                <h1 class="text-xl font-bold">NexoLabs Academy</h1>
+                <p class="text-sm">Gaighat, Udayapur</p>
+                <p class="text-sm">📞 977-9864162895</p>
+            </div>
+        </div>
+
+        <a href="{% url 'trainee_dashboard' %}" 
+           class="bg-white text-indigo-700 px-4 py-1 rounded text-sm">
+           ⬅ Back
+        </a>
+
+    </div>
+</div>
+
+
+<!-- MAIN -->
+<div class="max-w-6xl mx-auto p-6">
+
+    <h2 class="text-2xl font-bold mb-6">📋 Take Attendance</h2>
+
+    <!-- 🔷 CLASS SELECT -->
+    <div class="flex gap-2 mb-4 flex-wrap">
+        {% for c in classes %}
+        <a href="?class={{ c }}"
+           class="px-4 py-2 rounded 
+           {% if selected_class == c %}
+               bg-indigo-600 text-white
+           {% else %}
+               bg-gray-200
+           {% endif %}">
+            Class {{ c }}
+        </a>
+        {% empty %}
+            <p class="text-gray-500">No classes available</p>
+        {% endfor %}
+    </div>
+
+    <!-- 🔷 SECTION SELECT -->
+    {% if selected_class %}
+    <div class="flex gap-2 mb-4 flex-wrap">
+        {% for sec in sections %}
+        <a href="?class={{ selected_class }}&section={{ sec }}"
+           class="px-3 py-1 rounded text-sm
+           {% if selected_section == sec %}
+               bg-green-600 text-white
+           {% else %}
+               bg-gray-200
+           {% endif %}">
+            Section {{ sec }}
+        </a>
+        {% empty %}
+            <p class="text-gray-500">No sections available</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- 🔷 MESSAGE -->
+    {% if not selected_class %}
+    <div class="text-center text-gray-500 py-10">
+        👉 Please select a class
+    </div>
+    {% elif not selected_section %}
+    <div class="text-center text-gray-500 py-10">
+        👉 Please select a section
+    </div>
+    {% endif %}
+
+    {% if selected_class and selected_section %}
+
+    <!-- 🔒 LOCK MESSAGE -->
+    {% if already_marked %}
+    <div class="bg-green-100 text-green-700 p-3 rounded mb-4 text-center">
+        ✅ Attendance already submitted (Locked)
+    </div>
+    {% endif %}
+
+    <div class="bg-white p-6 rounded shadow">
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <input type="hidden" name="date" value="{{ today|date:'Y-m-d' }}">
+            <input type="hidden" name="class" value="{{ selected_class }}">
+            <input type="hidden" name="section" value="{{ selected_section }}">
+
+            <!-- NO CLASS -->
+            <div class="mb-4 flex justify-end">
+                <button name="no_class" value="1"
+                    {% if already_marked %}disabled{% endif %}
+                    class="bg-yellow-500 text-white px-3 py-1 rounded text-sm
+                    {% if already_marked %}opacity-50 cursor-not-allowed{% endif %}">
+                    🚫 No Class
+                </button>
+            </div>
+
+            <!-- TABLE -->
+            <table class="w-full text-sm border rounded">
+
+                <thead class="bg-indigo-100">
+                    <tr>
+                        <th class="p-3 text-left">Student</th>
+                        <th class="text-center">Status</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for s in students %}
+                    <tr class="border-t">
+
+                        <td class="p-3">{{ s.username }}</td>
+
+                        <td class="text-center">
+
+                            <input type="hidden" name="status_{{ s.id }}" id="input_{{ s.id }}"
+                                   value="{{ existing_attendance.s.id|default:'' }}">
+
+                            <div class="flex justify-center gap-2">
+
+                                <!-- PRESENT -->
+                                <button type="button"
+                                    {% if already_marked %}disabled{% endif %}
+                                    onclick="mark('{{ s.id }}','present')"
+                                    id="present_{{ s.id }}"
+                                    class="px-3 py-1 rounded
+                                    {% if existing_attendance.s.id == 'present' %}
+                                        bg-green-600 text-white
+                                    {% else %}
+                                        bg-gray-200
+                                    {% endif %}
+                                    {% if already_marked %}opacity-50 cursor-not-allowed{% endif %}">
+                                    ✔ Present
+                                </button>
+
+                                <!-- ABSENT -->
+                                <button type="button"
+                                    {% if already_marked %}disabled{% endif %}
+                                    onclick="mark('{{ s.id }}','absent')"
+                                    id="absent_{{ s.id }}"
+                                    class="px-3 py-1 rounded
+                                    {% if existing_attendance.s.id == 'absent' %}
+                                        bg-red-600 text-white
+                                    {% else %}
+                                        bg-gray-200
+                                    {% endif %}
+                                    {% if already_marked %}opacity-50 cursor-not-allowed{% endif %}">
+                                    ✖ Absent
+                                </button>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="2" class="text-center p-4 text-gray-500">
+                            No students found
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+
+            </table>
+
+            <!-- SAVE -->
+            <button
+                {% if already_marked %}disabled{% endif %}
+                class="w-full mt-6 bg-indigo-600 text-white py-2 rounded
+                {% if already_marked %}opacity-50 cursor-not-allowed{% endif %}">
+                🚀 Save Attendance
+            </button>
+
+        </form>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+<script>
+function mark(id, status) {
+
+    if (document.getElementById("present_" + id).disabled) return;
+
+    document.getElementById("input_" + id).value = status;
+
+    document.getElementById("present_" + id).classList.remove("bg-green-600","text-white");
+    document.getElementById("absent_" + id).classList.remove("bg-red-600","text-white");
+
+    if (status === "present") {
+        document.getElementById("present_" + id).classList.add("bg-green-600","text-white");
+    } else {
+        document.getElementById("absent_" + id).classList.add("bg-red-600","text-white");
+    }
+}
+</script>
+
+</body>
+</html>

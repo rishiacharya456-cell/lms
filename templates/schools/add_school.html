@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="p-6 max-w-2xl mx-auto">
+
+    <h2 class="text-2xl font-bold mb-6">➕ Add New School</h2>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="p-3 mb-3 rounded text-white
+                {% if message.tags == 'success' %}bg-green-500
+                {% else %}bg-red-500{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="POST" class="grid gap-4">
+        {% csrf_token %}
+
+        <input name="name" placeholder="School Name" class="p-3 border rounded">
+        <input name="email" placeholder="School Email" class="p-3 border rounded">
+        <input name="phone" placeholder="Phone" class="p-3 border rounded">
+        <input name="address" placeholder="Address" class="p-3 border rounded">
+
+        <hr>
+
+        <input name="username" placeholder="Admin Username" class="p-3 border rounded">
+        <input name="admin_email" placeholder="Admin Email" class="p-3 border rounded">
+        <input type="password" name="password" placeholder="Password" class="p-3 border rounded">
+
+        <button class="bg-blue-600 text-white p-3 rounded">
+            Add School
+        </button>
+
+    </form>
+
+</div>
+
+{% endblock %}

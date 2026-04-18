@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Appointment Letter</title>
+
+    <style>
+        body {
+            font-family: "Segoe UI", Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #eef2ff;
+        }
+
+        .page {
+            width: 210mm;
+            min-height: 297mm;
+            margin: auto;
+            background: white;
+            padding: 40px;
+            box-sizing: border-box;
+            border: 3px solid #4f46e5;
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #4f46e5;
+            padding-bottom: 10px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            color: #4f46e5;
+            letter-spacing: 1px;
+        }
+
+        .header p {
+            margin: 3px;
+            font-size: 14px;
+            color: #444;
+        }
+
+        .title {
+            text-align: center;
+            margin-top: 20px;
+            font-weight: bold;
+            font-size: 18px;
+            text-decoration: underline;
+            color: #111;
+        }
+
+        .section {
+            margin-top: 25px;
+            font-size: 15px;
+            line-height: 1.6;
+            color: #222;
+        }
+
+        .flex {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .details {
+            width: 65%;
+        }
+
+        .photo {
+            width: 30%;
+            text-align: right;
+        }
+
+        .photo img {
+            width: 120px;
+            height: 140px;
+            object-fit: cover;
+            border: 2px solid #4f46e5;
+            border-radius: 6px;
+        }
+
+        .box {
+            border: 2px solid #ddd;
+            padding: 15px;
+            margin-top: 15px;
+            background: #f9fafb;
+            border-radius: 6px;
+        }
+
+        .box p {
+            margin: 6px 0;
+        }
+
+        .signature {
+            margin-top: 60px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .signature div {
+            text-align: center;
+        }
+
+        .signature p {
+            margin: 5px 0;
+        }
+
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 12px;
+            color: gray;
+        }
+
+        @media print {
+            body {
+                background: none;
+            }
+            .page {
+                margin: 0;
+                box-shadow: none;
+                border: 2px solid #000;
+            }
+        }
+    </style>
+</head>
+
+<body onload="window.print()">
+
+<div class="page">
+
+    <!-- HEADER -->
+    <div class="header">
+        <h1>NEXOLABS ACADEMY</h1>
+        <p>Gaighat, Nepal</p>
+        <p>Email: info@nexolabs.com | Contact: +977-9864162895</p>
+    </div>
+
+    <!-- TITLE -->
+    <div class="title">
+        APPOINTMENT LETTER
+    </div>
+
+    <!-- DATE -->
+    <div class="section">
+        <p><strong>Date:</strong> {{ trainer.joining_date }}</p>
+    </div>
+
+    <!-- LETTER BODY -->
+    <div class="section">
+        <p><strong>To,</strong><br>
+        {{ trainer.username }}<br>
+        {{ trainer.address }}</p>
+
+        <p><strong>Subject:</strong> Appointment as Trainer</p>
+
+        <p>
+            Dear {{ trainer.username }},
+        </p>
+
+        <p>
+            We are pleased to appoint you as a <strong>Trainer</strong> at Nexolabs Academy.
+            Your skills and experience will be a valuable addition to our organization.
+        </p>
+    </div>
+
+    <!-- DETAILS + PHOTO -->
+    <div class="flex">
+
+        <div class="details box">
+            <p><strong>Registration No:</strong> {{ trainer.trainer_reg_no }}</p>
+            <p><strong>Qualification:</strong> {{ trainer.qualification }}</p>
+            <p><strong>Experience:</strong> {{ trainer.experience }}</p>
+            <p><strong>Phone:</strong> {{ trainer.phone }}</p>
+            <p><strong>Salary:</strong> Rs. {{ trainer.salary }}</p>
+            <p><strong>Joining Date:</strong> {{ trainer.joining_date }}</p>
+        </div>
+
+        <div class="photo">
+            {% if trainer.trainer_photo %}
+                <img src="{{ trainer.trainer_photo.url }}">
+            {% else %}
+                <p style="font-size: 13px; color: gray;">No Photo</p>
+            {% endif %}
+        </div>
+
+    </div>
+
+    <!-- TERMS -->
+    <div class="section">
+        <h4>Terms & Conditions:</h4>
+        <ul>
+            <li>Maintain discipline and professionalism at all times.</li>
+            <li>Follow all rules and policies of Nexolabs Academy.</li>
+            <li>Deliver high-quality training to students.</li>
+            <li>Performance will be reviewed periodically.</li>
+        </ul>
+    </div>
+
+    <!-- SIGNATURE -->
+    <div class="signature">
+        <div>
+            <p>______________________</p>
+            <p><strong>Authorized Signatory</strong></p>
+            <p>Nexolabs Academy</p>
+        </div>
+
+        <div>
+            <p>______________________</p>
+            <p><strong>Trainer Signature</strong></p>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+        This is a system-generated appointment letter.
+    </div>
+
+</div>
+
+</body>
+</html>

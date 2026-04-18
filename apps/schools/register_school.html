@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="min-h-screen flex items-center justify-center bg-gray-100 p-6">
+
+    <div class="w-full max-w-6xl bg-white rounded-xl shadow-lg overflow-hidden grid md:grid-cols-2">
+
+        <!-- LEFT PANEL -->
+        <div class="bg-blue-900 text-white p-8 flex flex-col justify-between">
+
+            <div>
+                <img src="https://cdn.dribbble.com/users/1615584/screenshots/15568123/media/ccf4f4d70a1e3e0d3a7d9b3dcb3b77b5.png"
+                     class="rounded-lg mb-6">
+
+                <div class="bg-white/10 p-4 rounded-lg text-sm">
+                    <span class="bg-white text-blue-900 px-3 py-1 rounded-full mr-2">1</span>
+                    Register with us, enter your details and click on <b>"Register"</b>
+                </div>
+            </div>
+
+            <div>
+                <img src="https://cdn.dribbble.com/users/1615584/screenshots/15568123/media/7eac191f85632d436a3d79042f2f20c4.png"
+                     class="rounded-lg mb-4">
+
+                <div class="bg-white/10 p-4 rounded-lg text-sm">
+                    <span class="bg-pink-500 text-white px-3 py-1 rounded-full mr-2">2</span>
+                    Choose your plan after approval
+                </div>
+            </div>
+
+        </div>
+
+        <!-- RIGHT FORM -->
+        <div class="p-10">
+
+            <h2 class="text-3xl font-bold mb-6 text-gray-800">Register</h2>
+
+            <form method="POST" class="grid grid-cols-2 gap-4">
+                {% csrf_token %}
+
+                <!-- USERNAME -->
+                <div>
+                    <label class="text-sm text-gray-600">User name</label>
+                    <input name="username" class="w-full mt-1 p-3 border rounded">
+                </div>
+
+                <!-- EMAIL -->
+                <div>
+                    <label class="text-sm text-gray-600">Email</label>
+                    <input name="admin_email" class="w-full mt-1 p-3 border rounded">
+                </div>
+
+                <!-- PHONE -->
+                <div>
+                    <label class="text-sm text-gray-600">Contact Number</label>
+                    <input name="phone" class="w-full mt-1 p-3 border rounded">
+                </div>
+
+                <!-- ADDRESS -->
+                <div>
+                    <label class="text-sm text-gray-600">Address</label>
+                    <input name="address" class="w-full mt-1 p-3 border rounded">
+                </div>
+
+                <!-- PASSWORD -->
+                <div>
+                    <label class="text-sm text-gray-600">Password</label>
+                    <input type="password" name="password" class="w-full mt-1 p-3 border rounded">
+                </div>
+
+                <!-- CONFIRM PASSWORD -->
+                <div>
+                    <label class="text-sm text-gray-600">Confirm Password</label>
+                    <input type="password" name="confirm_password" class="w-full mt-1 p-3 border rounded">
+                </div>
+
+                <!-- SCHOOL NAME -->
+                <div class="col-span-2">
+                    <label class="text-sm text-gray-600">School Name</label>
+                    <input name="name" class="w-full mt-1 p-3 border rounded">
+                </div>
+
+                <!-- BUTTONS -->
+                <div class="col-span-2 flex justify-between mt-4">
+
+                    <a href="/login/school_admin/"
+                       class="w-1/2 mr-2 border text-center py-3 rounded hover:bg-gray-100">
+                        Cancel
+                    </a>
+
+                    <button class="w-1/2 bg-blue-900 text-white py-3 rounded hover:bg-blue-800">
+                        Register
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

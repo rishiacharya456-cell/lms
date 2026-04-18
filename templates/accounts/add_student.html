@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="p-6 max-w-3xl mx-auto">
+
+    <h2 class="text-xl font-bold mb-4 text-center">Add Student</h2>
+
+    <form method="POST" enctype="multipart/form-data" class="space-y-4">
+        {% csrf_token %}
+
+        <!-- 🔥 PHOTO SECTION (TOP) -->
+        <div class="text-center">
+
+            <!-- PREVIEW -->
+            <img id="preview" 
+                 class="w-24 h-24 mx-auto rounded-full border object-cover mb-3"
+                 src="https://via.placeholder.com/100">
+
+            <!-- UPLOAD -->
+            <input type="file" name="photo" id="fileInput" accept="image/*" hidden>
+
+            <div class="flex justify-center gap-3">
+
+                <button type="button"
+                        onclick="document.getElementById('fileInput').click()"
+                        class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                    📁 Upload
+                </button>
+
+                <button type="button"
+                        onclick="startCamera()"
+                        class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                    📷 Capture
+                </button>
+
+            </div>
+
+            <!-- CAMERA -->
+            <video id="camera" class="hidden mt-3 w-48 mx-auto rounded"></video>
+
+            <button type="button" id="captureBtn"
+                    onclick="capturePhoto()"
+                    class="hidden mt-2 bg-black text-white px-3 py-1 rounded">
+                Capture Photo
+            </button>
+
+        </div>
+
+        <!-- FORM GRID -->
+        <div class="grid grid-cols-2 gap-4">
+
+            <input name="name" placeholder="Student Name" required
+                   class="p-2 border rounded">
+
+            <input type="date" name="dob" required
+                   class="p-2 border rounded">
+
+            <input name="father_name" placeholder="Father Name"
+                   class="p-2 border rounded">
+
+            <input name="mother_name" placeholder="Mother Name"
+                   class="p-2 border rounded">
+
+            <input name="phone" placeholder="Contact No"
+                   class="p-2 border rounded">
+
+            <input name="address" placeholder="Address"
+                   class="p-2 border rounded">
+
+            <!-- CLASS -->
+            <select name="student_class" required class="p-2 border rounded">
+                <option value="">Select Class</option>
+                <option>6</option>
+                <option>7</option>
+                <option>8</option>
+                <option>9</option>
+                <option>10</option>
+                <option>11</option>
+                <option>12</option>
+            </select>
+
+            <!-- SECTION -->
+            <select name="section" id="sectionSelect" class="p-2 border rounded">
+                <option value="">Select Section</option>
+
+                {% for sec in sections %}
+                    <option value="{{ sec.name }}">{{ sec.name }}</option>
+                {% endfor %}
+
+                <option value="__new__">➕ Add New Section</option>
+            </select>
+
+        </div>
+
+        <!-- NEW SECTION -->
+        <input type="text" name="new_section" id="newSectionInput"
+               placeholder="Enter new section"
+               class="p-2 border rounded hidden">
+
+        <!-- SUBMIT -->
+        <button class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">
+            Save Student
+        </button>
+
+    </form>
+
+</div>
+
+<!-- 🔥 SCRIPTS -->
+<script>
+    // Preview upload
+    const fileInput = document.getElementById('fileInput');
+    const preview = document.getElementById('preview');
+
+    fileInput.onchange = e => {
+        const [file] = fileInput.files;
+        if (file) {
+            preview.src = URL.createObjectURL(file);
+        }
+    };
+
+    // Section logic
+    const sectionSelect = document.getElementById("sectionSelect");
+    const newInput = document.getElementById("newSectionInput");
+
+    sectionSelect.addEventListener("change", function () {
+        if (this.value === "__new__") {
+            newInput.classList.remove("hidden");
+            newInput.required = true;
+        } else {
+            newInput.classList.add("hidden");
+            newInput.required = false;
+        }
+    });
+
+    // Camera
+    let stream;
+
+    function startCamera() {
+        const video = document.getElementById("camera");
+        const btn = document.getElementById("captureBtn");
+
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(s => {
+                stream = s;
+                video.srcObject = stream;
+                video.play();
+                video.classList.remove("hidden");
+                btn.classList.remove("hidden");
+            });
+    }
+
+    function capturePhoto() {
+        const video = document.getElementById("camera");
+        const canvas = document.createElement("canvas");
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(video, 0, 0);
+
+        const dataURL = canvas.toDataURL("image/png");
+        preview.src = dataURL;
+
+        // Stop camera
+        stream.getTracks().forEach(track => track.stop());
+        video.classList.add("hidden");
+
+        alert("Photo captured (preview only, upload manually for now)");
+    }
+</script>
+
+{% endblock %}

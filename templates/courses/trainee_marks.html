@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="flex">
+
+    <!-- SIDEBAR -->
+    <div class="w-64 bg-indigo-700 text-white min-h-screen p-5">
+        <h2 class="text-xl font-bold mb-6">Trainee Panel</h2>
+
+        <ul class="space-y-3 text-sm">
+            <li>
+                <a href="#" class="block hover:bg-indigo-600 p-2 rounded">Dashboard</a>
+            </li>
+
+            <li>
+                <a href="{% url 'take_attendance' %}" 
+                   class="block hover:bg-indigo-600 p-2 rounded">
+                   Attendance
+                </a>
+            </li>
+
+            <li class="bg-indigo-900 p-2 rounded">
+                📝 Internal Marks
+            </li>
+
+            <li class="hover:bg-indigo-600 p-2 rounded">Profile</li>
+        </ul>
+    </div>
+
+
+    <!-- MAIN -->
+    <div class="flex-1 p-6 bg-gray-100">
+
+        <h2 class="text-2xl font-bold mb-6">
+            📝 Internal Marks Entry
+        </h2>
+
+        <!-- CLASS FILTER -->
+        <div class="flex gap-2 mb-6">
+            {% for cls in classes %}
+            <a href="?class={{ cls }}"
+               class="px-4 py-1 rounded text-sm
+               {% if selected_class == cls %}
+                   bg-indigo-600 text-white
+               {% else %}
+                   bg-gray-200
+               {% endif %}">
+                Class {{ cls }}
+            </a>
+            {% endfor %}
+        </div>
+
+        <!-- TABLE -->
+        <div class="bg-white rounded-xl shadow p-6">
+
+            <table class="w-full text-sm">
+
+                <thead class="bg-gray-100">
+                    <tr>
+                        <th class="p-2 text-left">Student</th>
+                        <th>Reg No</th>
+                        <th>Course</th>
+                        <th>Internal Full</th>
+                        <th>Status</th>
+                        <th>Marks</th>
+                        <th>Save</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for reg in registrations %}
+                    <tr class="border-t">
+
+                        <td>{{ reg.student.first_name }}</td>
+                        <td>{{ reg.student.username }}</td>
+                        <td>{{ reg.course.name }}</td>
+                        <td>{{ reg.course.internal_marks }}</td>
+
+                        <!-- STATUS -->
+                        <td>
+                            {% if reg.status == "approved" %}
+                                <span class="text-green-600 font-semibold">Approved</span>
+                            {% elif reg.status == "pending" %}
+                                <span class="text-yellow-600">Pending</span>
+                            {% else %}
+                                <span class="text-red-600">Rejected</span>
+                            {% endif %}
+                        </td>
+
+                        {% if reg.status == "approved" %}
+                        <!-- MARK INPUT -->
+                        <td class="text-center">
+                            <input type="number"
+                                   name="marks"
+                                   value="{{ reg.internal_obtained }}"
+                                   min="0"
+                                   max="{{ reg.course.internal_marks }}"
+                                   form="form-{{ reg.id }}"
+                                   class="border p-1 w-16 text-center rounded">
+                        </td>
+
+                        <!-- SAVE BUTTON -->
+                        <td class="text-center">
+                            <form id="form-{{ reg.id }}"
+                                  method="POST"
+                                  action="{% url 'save_internal_marks' reg.id %}"
+                                  class="mark-form inline">
+                                {% csrf_token %}
+                                <button type="submit"
+                                        class="save-btn bg-indigo-600 text-white px-2 py-1 rounded text-xs">
+                                    Save
+                                </button>
+                            </form>
+                        </td>
+
+                        {% else %}
+                        <td colspan="2" class="text-center text-gray-400 text-xs">
+                            Not Approved / Not Registered
+                        </td>
+                        {% endif %}
+
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center p-5 text-gray-500">
+                            No students found
+                        </td>
+                    </tr>
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- 🔥 FIXED SCRIPT -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    document.querySelectorAll(".mark-form").forEach(function(form) {
+
+        form.addEventListener("submit", function(e) {
+            e.preventDefault();
+
+            const button = form.querySelector(".save-btn");
+
+            button.innerText = "Saving...";
+            button.classList.remove("bg-indigo-600");
+            button.classList.add("bg-gray-400");
+
+            fetch(form.action, {
+                method: "POST",
+                body: new FormData(form),
+                headers: {
+                    "X-CSRFToken": form.querySelector("[name=csrfmiddlewaretoken]").value
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    button.innerText = "Saved ✓";
+                    button.classList.remove("bg-gray-400");
+                    button.classList.add("bg-green-600");
+                    button.disabled = true;
+                } else {
+                    button.innerText = "Error";
+                    button.classList.add("bg-red-600");
+                }
+            });
+
+        });
+
+    });
+
+});
+</script>
+
+{% endblock %}

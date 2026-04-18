@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Slip</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            margin: 0;
+        }
+
+        @page {
+            size: A5 portrait;
+            margin: 5mm;
+        }
+
+        .page {
+            width: 100%;
+        }
+
+        .card {
+            border: 1px solid #000;
+            padding: 6px;
+            margin-bottom: 6px;
+
+            height: 48%;
+            box-sizing: border-box;
+
+            page-break-inside: avoid;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .center {
+            text-align: center;
+            flex: 1;
+        }
+
+        .logo {
+            height: 35px;
+        }
+
+        .row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            margin-top: 3px;
+        }
+
+        .left {
+            width: 65%;
+        }
+
+        .right {
+            width: 30%;
+            text-align: center;
+        }
+
+        .photo {
+            width: 70px;
+            height: 70px;
+            object-fit: cover;
+            border: 1px solid #000;
+            margin-bottom: 5px; /* 🔥 better spacing */
+        }
+
+        hr {
+            margin: 5px 0;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 10px;
+        }
+
+        .bold {
+            font-weight: bold;
+        }
+
+    </style>
+</head>
+
+<body onload="window.print()">
+
+<div class="page">
+
+{% for i in "ab" %}
+
+<div class="card">
+
+    <!-- HEADER -->
+    <div class="header">
+
+        <img src="/static/images/logo.png" class="logo">
+
+        <div class="center">
+            <div class="bold">{{ student.school.name }}</div>
+            <div style="font-size:11px;">{{ student.school.address }}</div>
+        </div>
+
+        {% if student.school.logo %}
+            <img src="{{ student.school.logo.url }}" class="logo">
+        {% endif %}
+
+    </div>
+
+    <hr>
+
+    <!-- BODY -->
+    <div class="row">
+
+        <!-- LEFT -->
+        <div class="left">
+            <p><b>Name:</b> {{ student.first_name }}</p>
+            <p><b>Class:</b> {{ student.student_class }}</p>
+            <p><b>Section:</b> {{ student.section }}</p>
+        </div>
+
+        <!-- RIGHT -->
+        <div class="right">
+
+            <!-- 🔥 PHOTO NOW ON TOP -->
+            {% if student.photo %}
+                <img src="{{ student.photo.url }}" class="photo">
+            {% endif %}
+
+            <p><b>DOB:</b> {{ student.dob }}</p>
+            <p><b>Contact:</b> {{ student.phone }}</p>
+
+        </div>
+
+    </div>
+
+    <hr>
+
+    <!-- LOGIN -->
+    <p><b>Reg No:</b> {{ student.username }}</p>
+    <p><b>Password:</b> {{ student.dob }}</p>
+
+    <!-- FOOTER -->
+    <div class="footer">
+        Use this to access Nexolabs Learning Platform<br>
+        Powered by Nexolabs
+    </div>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+</body>
+</html>

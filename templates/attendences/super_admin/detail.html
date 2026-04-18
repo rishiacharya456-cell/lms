@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="p-6 bg-gray-100 min-h-screen">
+
+    <h2 class="text-2xl font-bold mb-6">Attendance Detail</h2>
+
+    <!-- SESSION INFO -->
+    <div class="bg-white p-5 rounded shadow mb-6">
+        <p class="mb-2"><strong>School:</strong> {{ session.school.name }}</p>
+        <p class="mb-2"><strong>Date:</strong> {{ session.date }}</p>
+        <p>
+            <strong>Status:</strong>
+            {% if session.is_locked %}
+                <span class="text-red-600 font-bold">🔒 Locked</span>
+            {% else %}
+                <span class="text-green-600 font-bold">🟢 Open</span>
+            {% endif %}
+        </p>
+    </div>
+
+    <!-- ACTION BUTTONS -->
+    <div class="mb-6 flex gap-3 flex-wrap">
+
+        {% if session.is_locked %}
+        <a href="{% url 'unlock_attendance' session.id %}"
+           class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded">
+            🔓 Unlock
+        </a>
+        {% endif %}
+
+        <a href="{% url 'edit_attendance' session.id %}"
+           class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
+            ✏ Edit
+        </a>
+
+        <a href="{% url 'attendance_list' %}"
+           class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded">
+            ← Back
+        </a>
+
+    </div>
+
+    <!-- RECORD TABLE -->
+    <div class="bg-white p-4 rounded shadow">
+        <table class="w-full text-sm">
+
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="p-3 text-left">Student</th>
+                    <th class="text-left">Status</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for r in records %}
+                <tr class="border-t">
+                    <td class="p-3 font-medium">{{ r.student.username }}</td>
+                    <td>
+                        {% if r.status == 'present' %}
+                            <span class="text-green-600 font-semibold">Present</span>
+                        {% else %}
+                            <span class="text-red-600 font-semibold">Absent</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="2" class="text-center p-4 text-gray-500">
+                        No attendance records found
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+    </div>
+
+</div>
+
+{% endblock %}

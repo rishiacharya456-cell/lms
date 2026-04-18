@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="p-6 bg-gray-100 min-h-screen">
+
+    <h2 class="text-2xl font-bold mb-6">Attendance Sessions</h2>
+
+    <!-- TABLE -->
+    <div class="bg-white p-4 rounded shadow">
+        <table class="w-full text-sm">
+
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="p-3">School</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for s in sessions %}
+                <tr class="border-t">
+
+                    <td class="p-3 font-semibold">{{ s.school.name }}</td>
+                    <td>{{ s.date }}</td>
+
+                    <td>
+                        {% if s.is_locked %}
+                            <span class="text-red-600 font-semibold">🔒 Locked</span>
+                        {% else %}
+                            <span class="text-green-600 font-semibold">🟢 Open</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        <!-- ✅ STEP 5: DETAIL PAGE LINK -->
+                        <a href="{% url 'attendance_detail' s.id %}" 
+                           class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">
+                            View
+                        </a>
+                    </td>
+
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center p-4 text-gray-500">
+                        No attendance sessions found
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+    </div>
+
+</div>
+
+{% endblock %}

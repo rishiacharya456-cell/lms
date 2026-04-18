@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="p-6 bg-gray-100 min-h-screen">
+
+    <!-- 🔷 HEADER -->
+    <div class="bg-white p-5 rounded shadow flex items-center justify-between">
+        <div class="flex items-center gap-4">
+            {% if school.logo %}
+                <img src="{{ school.logo.url }}" class="w-16 h-16 rounded object-cover border">
+            {% else %}
+                <div class="w-16 h-16 bg-gray-200 flex items-center justify-center rounded">
+                    🏫
+                </div>
+            {% endif %}
+
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800">{{ school.name }}</h1>
+                <p class="text-sm text-gray-500">{{ school.email }}</p>
+                <p class="text-sm text-gray-500">{{ school.phone }}</p>
+            </div>
+        </div>
+
+        <span class="px-3 py-1 text-sm rounded 
+            {% if school.status == 'approved' %}
+                bg-green-100 text-green-700
+            {% else %}
+                bg-yellow-100 text-yellow-700
+            {% endif %}
+        ">
+            {{ school.status|title }}
+        </span>
+    </div>
+
+    <!-- 🔷 STATS -->
+    <div class="grid grid-cols-4 gap-4 mt-6">
+        <div class="bg-white p-4 rounded shadow text-center">
+            <p class="text-gray-500 text-sm">Classes</p>
+            <h2 class="text-2xl font-bold">{{ classes|length }}</h2>
+        </div>
+
+        <div class="bg-white p-4 rounded shadow text-center">
+            <p class="text-gray-500 text-sm">Students</p>
+            <h2 class="text-2xl font-bold">{{ students.paginator.count }}</h2>
+        </div>
+
+        <div class="bg-white p-4 rounded shadow text-center">
+            <p class="text-gray-500 text-sm">Sections</p>
+            <h2 class="text-2xl font-bold">{{ sections|length }}</h2>
+        </div>
+
+        <div class="bg-white p-4 rounded shadow text-center">
+            <p class="text-gray-500 text-sm">Trainer</p>
+            <h2 class="text-lg font-semibold">
+                {% for t in trainers %}
+                    {{ t.trainer_reg_no }}
+                {% empty %}
+                    Not Assigned
+                {% endfor %}
+            </h2>
+        </div>
+    </div>
+
+    <!-- 🔥 NEW: CLASS SUMMARY -->
+    <div class="bg-white p-5 rounded shadow mt-6">
+        <h3 class="font-bold mb-4">📊 Class Registration Summary</h3>
+
+        <div class="grid grid-cols-3 gap-4">
+            {% for c in class_summary %}
+            <div class="bg-gray-100 p-4 rounded">
+                <h4 class="font-semibold mb-2">Class {{ c.class }}</h4>
+                <p>Total: {{ c.total }}</p>
+                <p class="text-green-600">Registered: {{ c.registered }}</p>
+                <p class="text-red-500">Not Registered: {{ c.not_registered }}</p>
+
+                <a href="?class={{ c.class }}" class="text-indigo-600 text-sm">
+                    View →
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- 🔥 CLASS CARDS (UNCHANGED) -->
+    <div class="bg-white p-5 rounded shadow mt-6">
+        <h3 class="font-bold mb-4">Classes</h3>
+
+        <div class="grid grid-cols-6 gap-3">
+            <a href="?" class="p-3 text-center rounded font-semibold
+                {% if not selected_class %} bg-indigo-600 text-white {% else %} bg-indigo-100 {% endif %}">
+                All
+            </a>
+
+            {% for c in classes %}
+            <a href="?class={{ c }}" 
+               class="p-3 text-center rounded font-semibold
+               {% if selected_class == c|stringformat:"s" %}
+                   bg-indigo-600 text-white
+               {% else %}
+                   bg-indigo-100
+               {% endif %}">
+                Class {{ c }}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- 🔷 STUDENTS TABLE (UPDATED CLICKABLE) -->
+    <div class="bg-white p-5 rounded shadow mt-6">
+
+        <h3 class="font-bold mb-4">Students</h3>
+
+        <table class="w-full text-sm">
+
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="p-2">Photo</th>
+                    <th>Name</th>
+                    <th>Class</th>
+                    <th>Section</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for s in students %}
+                <tr class="border-t hover:bg-gray-50">
+
+                    <td class="p-2">
+                        {% if s.student_photo %}
+                            <img src="{{ s.student_photo.url }}" class="w-8 h-8 rounded-full">
+                        {% else %}
+                            👤
+                        {% endif %}
+                    </td>
+
+                    <td>{{ s.username }}</td>
+                    <td>{{ s.student_class }}</td>
+                    <td>{{ s.section }}</td>
+
+                    <td>
+                        <a href="?class={{ s.student_class }}&student={{ s.id }}"
+   class="text-indigo-600 text-sm">
+   View Marks
+</a>
+                    </td>
+
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+    </div>
+
+    <!-- 🔥 NEW: INTERNAL MARKS -->
+    {% if selected_student %}
+    <div class="bg-white p-5 rounded shadow mt-6">
+
+        <h3 class="font-bold mb-4">📝 Internal Marks</h3>
+
+        <table class="w-full text-sm">
+
+            <thead class="bg-gray-100">
+                <tr>
+                    <th>Course</th>
+                    <th>Full</th>
+                    <th>Obtained</th>
+                    <th>Update</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for reg in student_regs %}
+                <tr class="border-t">
+
+                    <td>{{ reg.course.name }}</td>
+                    <td>{{ reg.course.internal_marks }}</td>
+
+                    <form method="POST" action="{% url 'admin_update_marks' reg.id %}">
+                        {% csrf_token %}
+
+                        <td>
+                            <input type="number"
+                                   name="marks"
+                                   value="{{ reg.internal_obtained }}"
+                                   class="border p-1 w-20 text-center">
+                        </td>
+
+                        <td>
+                            <button class="bg-indigo-600 text-white px-2 py-1 rounded text-xs">
+                                Update
+                            </button>
+                        </td>
+                    </form>
+
+                </tr>
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+    {% endif %}
+
+</div>
+
+{% endblock %}

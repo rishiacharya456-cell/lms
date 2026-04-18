@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="p-6">
+
+<h2 class="text-2xl font-bold mb-6">
+    🏫 {{ school.name }} - Attendance Report
+</h2>
+
+<!-- 🔥 FILTER -->
+<form method="GET" class="flex gap-3 mb-5" id="filterForm">
+
+    <!-- 🔥 CLASS (AUTO LOAD SECTIONS) -->
+    <select name="class" class="border p-2 rounded" onchange="this.form.submit()">
+        <option value="">Select Class</option>
+        {% for c in classes %}
+        <option value="{{ c }}" {% if selected_class == c %}selected{% endif %}>
+            Class {{ c }}
+        </option>
+        {% endfor %}
+    </select>
+
+    <!-- 🔥 SECTION -->
+    <select name="section" class="border p-2 rounded">
+        <option value="">Select Section</option>
+
+        {% if sections %}
+            {% for sec in sections %}
+            <option value="{{ sec }}" {% if selected_section == sec %}selected{% endif %}>
+                {{ sec }}
+            </option>
+            {% endfor %}
+        {% else %}
+            <option disabled>No sections available</option>
+        {% endif %}
+    </select>
+
+    <button class="bg-indigo-600 text-white px-4 py-2 rounded">
+        Filter
+    </button>
+
+</form>
+
+<div class="bg-white p-5 rounded shadow">
+
+<table class="w-full text-sm border">
+
+<thead class="bg-gray-100">
+<tr>
+    <th class="p-3">Student</th>
+    <th>Class</th>
+    <th>Section</th>
+    <th>Date</th>
+    <th>Total</th>
+    <th>Present</th>
+    <th>Absent</th>
+    <th>%</th>
+    <th>Action</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for s in student_data %}
+<tr class="border-t hover:bg-gray-50">
+
+    <td class="p-3 font-semibold">
+        {{ s.student.first_name }} {{ s.student.last_name }}
+        <div class="text-xs text-gray-500">
+            Reg: {{ s.student.username }}
+        </div>
+    </td>
+
+    <td class="text-center">{{ s.class }}</td>
+    <td class="text-center">{{ s.section }}</td>
+
+    <td class="text-center text-gray-600 text-xs">
+        {{ s.last_date|date:"Y-m-d" }}
+    </td>
+
+    <td class="text-center">{{ s.total }}</td>
+
+    <td class="text-center text-green-600 font-semibold">
+        {{ s.present }}
+    </td>
+
+    <td class="text-center text-red-500 font-semibold">
+        {{ s.absent }}
+    </td>
+
+    <td class="text-center font-bold
+        {% if s.percentage >= 75 %}
+            text-green-600
+        {% elif s.percentage >= 50 %}
+            text-yellow-500
+        {% else %}
+            text-red-500
+        {% endif %}
+    ">
+        {{ s.percentage }}%
+    </td>
+
+    <td class="text-center">
+
+        {% if school.school_can_edit %}
+        <button onclick="openEdit('{{ s.student.id }}')"
+                class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-xs">
+            ✏️ Edit
+        </button>
+        {% else %}
+        <span class="text-gray-400 text-xs">🔒 Locked</span>
+        {% endif %}
+
+    </td>
+
+</tr>
+
+{% empty %}
+<tr>
+    <td colspan="9" class="text-center p-4 text-gray-500">
+        Select class & section
+    </td>
+</tr>
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+<!-- 🔥 EDIT MODAL (UNCHANGED) -->
+<div id="editModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+
+    <div class="bg-white p-6 rounded shadow w-96">
+
+        <h3 class="font-bold mb-3">Edit Attendance</h3>
+
+        <form method="GET">
+            <input type="hidden" name="class" value="{{ selected_class }}">
+            <input type="hidden" name="section" value="{{ selected_section }}">
+
+            <label class="text-sm">Select Date</label>
+            <input type="date" name="edit_date" class="border p-2 w-full mb-4" required>
+
+            <button class="bg-indigo-600 text-white px-4 py-2 rounded w-full">
+                Load Attendance
+            </button>
+        </form>
+
+        <button onclick="closeEdit()" class="mt-3 text-sm text-gray-500">
+            Cancel
+        </button>
+
+    </div>
+
+</div>
+
+<script>
+function openEdit(){
+    document.getElementById("editModal").classList.remove("hidden");
+}
+function closeEdit(){
+    document.getElementById("editModal").classList.add("hidden");
+}
+</script>
+
+{% endblock %}

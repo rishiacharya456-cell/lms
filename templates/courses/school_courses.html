@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="p-8 bg-gray-100 min-h-screen">
+
+    <!-- HEADER -->
+    <div class="mb-6">
+        <h2 class="text-2xl font-bold text-gray-800">
+            📚 School Courses
+        </h2>
+        <p class="text-gray-500">
+            Enable courses for specific class students
+        </p>
+    </div>
+
+    <!-- CLASS-WISE COURSES -->
+    {% if class_groups %}
+
+        {% for cls, courses in class_groups.items %}
+        
+        <div class="mb-6">
+
+            <!-- CLASS TITLE -->
+            <h3 class="text-lg font-bold text-gray-700 mb-3">
+                Class {{ cls }}
+            </h3>
+
+            <!-- TABLE -->
+            <div class="bg-white rounded-xl shadow p-6">
+
+                <table class="w-full text-sm border-collapse">
+
+                    <thead class="bg-gray-100 text-gray-600">
+                        <tr>
+                            <th class="p-3 text-left">Course</th>
+                            <th class="text-center">Fee</th>
+                            <th class="text-center">Status</th>
+                            <th class="text-center">Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for assign in courses %}
+                        <tr class="border-t hover:bg-gray-50">
+
+                            <td class="p-3 font-semibold">
+                                {{ assign.course.name }}
+                            </td>
+
+                            <td class="text-center">
+                                Rs. {{ assign.course.exam_fee }}
+                            </td>
+
+                            <td class="text-center">
+                                {% if assign.is_visible %}
+                                    <span class="text-green-600 font-semibold">
+                                        Enabled for Class {{ cls }}
+                                    </span>
+                                {% else %}
+                                    <span class="text-gray-500">
+                                        Not Available
+                                    </span>
+                                {% endif %}
+                            </td>
+
+                            <td class="text-center">
+                                <a href="{% url 'toggle_course' assign.id %}"
+                                   class="px-3 py-1 text-white text-xs rounded
+                                   {% if assign.is_visible %}
+                                       bg-red-500 hover:bg-red-600
+                                   {% else %}
+                                       bg-green-600 hover:bg-green-700
+                                   {% endif %}">
+                                    
+                                    {% if assign.is_visible %}
+                                        Disable
+                                    {% else %}
+                                        Allow Students
+                                    {% endif %}
+                                </a>
+                            </td>
+
+                        </tr>
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    {% else %}
+
+        <!-- EMPTY STATE -->
+        <div class="bg-white rounded-xl shadow p-10 text-center">
+            <h3 class="text-lg font-semibold text-gray-700 mb-2">
+                No courses available
+            </h3>
+            <p class="text-gray-500">
+                Courses must be assigned by Super Admin first
+            </p>
+        </div>
+
+    {% endif %}
+
+
+    <!-- 🔥 APPLIED STUDENTS -->
+    <div class="bg-white rounded-xl shadow p-6 mt-8">
+
+        <h3 class="text-lg font-bold mb-4">
+            📥 Course Applications
+        </h3>
+
+        <table class="w-full text-sm border-collapse">
+
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="p-3 text-left">Student</th>
+                    <th class="text-center">Reg No</th>
+                    <th class="text-center">Class</th>
+                    <th class="text-center">Section</th>
+                    <th class="text-center">Course</th>
+                    <th class="text-center">Status</th>
+                    <th class="text-center">Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for reg in registrations %}
+                <tr class="border-t hover:bg-gray-50">
+
+                    <td class="p-2 font-medium">
+                        {{ reg.student.first_name }}
+                    </td>
+
+                    <td class="text-center">
+                        {{ reg.student.username }}
+                    </td>
+
+                    <td class="text-center">
+                        {{ reg.student.student_class }}
+                    </td>
+
+                    <td class="text-center">
+                        {{ reg.student.section }}
+                    </td>
+
+                    <td class="text-center">
+                        {{ reg.course.name }}
+                    </td>
+
+                    <td class="text-center">
+                        {% if reg.status == "approved" %}
+                            <span class="text-green-600 font-semibold">Approved</span>
+                        {% elif reg.status == "rejected" %}
+                            <span class="text-red-600 font-semibold">Rejected</span>
+                        {% else %}
+                            <span class="text-yellow-600 font-semibold">Pending</span>
+                        {% endif %}
+                    </td>
+
+                    <td class="text-center">
+                        {% if reg.status == "pending" %}
+                            <a href="{% url 'approve_student' reg.id %}" 
+                               onclick="return confirm('Approve this student?')"
+                               class="bg-green-600 text-white px-2 py-1 rounded text-xs hover:bg-green-700">
+                               Approve
+                            </a>
+
+                            <a href="{% url 'reject_student' reg.id %}" 
+                               onclick="return confirm('Reject this student?')"
+                               class="bg-red-600 text-white px-2 py-1 rounded text-xs hover:bg-red-700">
+                               Reject
+                            </a>
+                        {% else %}
+                            <span class="text-gray-400 text-xs">No Action</span>
+                        {% endif %}
+                    </td>
+
+                </tr>
+
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center p-5 text-gray-500">
+                        No applications yet
+                    </td>
+                </tr>
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}

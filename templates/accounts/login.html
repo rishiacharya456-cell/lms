@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ role|title }} Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="min-h-screen relative flex flex-col">
+
+    <!-- BACKGROUND -->
+    {% if role == 'super_admin' %}
+        <img src="https://images.unsplash.com/photo-1557804506-669a67965ba0"
+             class="absolute w-full h-full object-cover">
+    {% elif role == 'school_admin' %}
+        <img src="https://images.unsplash.com/photo-1509062522246-3755977927d7"
+             class="absolute w-full h-full object-cover">
+    {% elif role == 'trainer' %}
+        <img src="https://images.unsplash.com/photo-1577896851231-70ef18881754"
+             class="absolute w-full h-full object-cover">
+    {% else %}
+        <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644"
+             class="absolute w-full h-full object-cover">
+    {% endif %}
+
+    <!-- OVERLAY -->
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+
+    <!-- NAVBAR -->
+    <div class="relative z-10 bg-white/90 backdrop-blur border-b shadow-sm">
+        <div class="max-w-6xl mx-auto px-6 py-3 flex justify-between items-center">
+
+            <div class="flex items-center gap-3">
+                <img src="/static/images/logo.png" class="w-10 h-10">
+                <div>
+                    <h1 class="font-semibold text-gray-800">Nexolabs Academy</h1>
+                    <p class="text-xs text-gray-500">Learning Portal</p>
+                </div>
+            </div>
+
+            <div class="text-sm text-gray-600">
+                {{ role|title|cut:"_" }} Panel
+            </div>
+
+        </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="flex-grow flex items-center justify-center relative z-10 px-4">
+
+        <div class="w-full max-w-4xl bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden grid md:grid-cols-2">
+
+            <!-- LEFT -->
+            <div class="hidden md:flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-8">
+                <img src="/static/images/logo.png" class="w-24 mb-4">
+                <h2 class="text-xl font-semibold text-gray-800 mb-2">Nexolabs Academy</h2>
+                <p class="text-gray-600 text-sm text-center">
+                    Empowering students with Python, IoT & Robotics education.
+                </p>
+            </div>
+
+            <!-- RIGHT -->
+            <div class="p-8">
+
+                <h2 class="text-2xl font-bold mb-4 text-center text-gray-800">
+                    {{ role|title|cut:"_" }} Login
+                </h2>
+
+                <!-- 🔥 MESSAGES (FIXED) -->
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="p-3 mb-3 rounded text-white text-sm
+                            {% if message.tags == 'error' %}bg-red-500
+                            {% elif message.tags == 'warning' %}bg-yellow-500
+                            {% else %}bg-green-500{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <form method="POST" onsubmit="return validateCaptcha()">
+                    {% csrf_token %}
+
+                    <input type="text" name="username" placeholder="Username"
+                        class="w-full mb-4 p-3 border rounded focus:ring-2 focus:ring-blue-500">
+
+                    <input type="password" name="password" placeholder="Password"
+                        class="w-full mb-4 p-3 border rounded focus:ring-2 focus:ring-blue-500">
+
+                    <!-- CAPTCHA -->
+                    <div class="flex items-center gap-3 mb-4">
+                        <div id="captchaBox"
+                             class="bg-gray-200 px-4 py-2 font-mono tracking-widest text-lg rounded"></div>
+
+                        <button type="button" onclick="generateCaptcha()"
+                                class="bg-blue-600 text-white px-3 py-2 rounded">
+                            ↻
+                        </button>
+                    </div>
+
+                    <input type="text" id="captchaInput" placeholder="Enter Captcha"
+                        class="w-full mb-4 p-3 border rounded">
+
+                    <button class="w-full bg-blue-600 text-white p-3 rounded hover:bg-blue-700 transition">
+                        Log In
+                    </button>
+                </form>
+
+                <!-- LINKS -->
+                <div class="flex justify-between mt-4 text-sm text-gray-600">
+                    <a href="#">Forgot Username?</a>
+                    <a href="#">Forgot Password?</a>
+                </div>
+
+                <!-- REGISTER SCHOOL -->
+                {% if role == 'school_admin' %}
+                <div class="mt-6 text-center text-sm text-gray-700">
+                    Don't have your school?
+                    <a href="{% url 'register_school' %}" 
+                       class="text-blue-600 font-semibold hover:underline">
+                        Register your school
+                    </a>
+                </div>
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <div class="relative z-10 bg-white/90 backdrop-blur border-t text-center py-3 text-sm text-gray-600">
+        © 2026 Nexolabs Academy • info@nexolabs.com.np
+    </div>
+
+    <!-- CAPTCHA SCRIPT -->
+    <script>
+        let captchaText = "";
+
+        function generateCaptcha() {
+            const chars = "0123456789";
+            captchaText = "";
+
+            for (let i = 0; i < 5; i++) {
+                captchaText += chars[Math.floor(Math.random() * chars.length)];
+            }
+
+            document.getElementById("captchaBox").innerText = captchaText.split("").join(" ");
+        }
+
+        function validateCaptcha() {
+            const input = document.getElementById("captchaInput").value;
+            if (input !== captchaText) {
+                alert("Invalid captcha");
+                generateCaptcha();
+                return false;
+            }
+            return true;
+        }
+
+        window.onload = generateCaptcha;
+    </script>
+
+</body>
+</html>

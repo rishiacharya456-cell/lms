@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="flex">
+
+    <!-- SIDEBAR -->
+    <div class="w-64 bg-indigo-700 text-white min-h-screen p-5">
+        <h2 class="text-xl font-bold mb-6">Trainee Panel</h2>
+
+        <ul class="space-y-3 text-sm">
+            <li class="bg-indigo-900 p-2 rounded">Dashboard</li>
+
+            <li>
+                <a href="{% url 'take_attendance' %}" 
+                   class="block hover:bg-indigo-600 p-2 rounded">
+                   Attendance
+                </a>
+            </li>
+
+
+            <li>
+    <a href="{% url 'trainee_marks' %}" 
+       class="block hover:bg-indigo-600 p-2 rounded">
+       📝 Internal Marks
+    </a>
+</li>
+
+            <li class="hover:bg-indigo-600 p-2 rounded">Profile</li>
+        </ul>
+    </div>
+
+    <!-- MAIN -->
+    <div class="flex-1 p-6 bg-gray-100">
+
+        <!-- HEADER -->
+        <h1 class="text-2xl font-bold mb-6">
+            Welcome, {{ trainer.username }}
+        </h1>
+
+        <!-- PROFILE + SCHOOL -->
+        <div class="grid grid-cols-2 gap-6">
+
+            <div class="bg-white p-6 rounded shadow flex gap-4 items-center">
+                {% if trainer.trainer_photo %}
+                    <img src="{{ trainer.trainer_photo.url }}"
+                         class="w-20 h-20 rounded-full border">
+                {% else %}
+                    <div class="w-20 h-20 bg-gray-300 rounded-full"></div>
+                {% endif %}
+
+                <div>
+                    <p class="font-bold">{{ trainer.username }}</p>
+                    <p class="text-sm text-gray-500">{{ trainer.trainer_reg_no }}</p>
+                    <p class="text-sm">{{ trainer.email }}</p>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded shadow">
+                <h3 class="font-semibold mb-2">Assigned School</h3>
+
+                {% if school %}
+                    <p><strong>Name:</strong> {{ school.name }}</p>
+                    <p><strong>Status:</strong> {{ school.status }}</p>
+                {% else %}
+                    <p class="text-gray-500">No school assigned</p>
+                {% endif %}
+            </div>
+
+        </div>
+
+        <!-- 🔥 CLASS STATUS -->
+        <div class="bg-white p-6 rounded shadow mt-6">
+
+            <h3 class="font-bold mb-4">📊 Class-wise Attendance Status</h3>
+
+            {% for c in class_stats %}
+            <div class="mb-4 border rounded p-4">
+
+                <div class="flex justify-between items-center mb-2">
+                    <h4 class="font-semibold">Class {{ c.class }}</h4>
+
+                    {% if c.today_done %}
+                        <span class="text-green-600 font-bold">✅ Done</span>
+                    {% else %}
+                        <span class="text-red-500 font-bold">❌ Pending</span>
+                    {% endif %}
+                </div>
+
+                <div class="w-full bg-gray-200 rounded h-3 mb-2">
+                    <div class="bg-indigo-600 h-3 rounded"
+                         style="width: {{ c.percentage }}%"></div>
+                </div>
+
+                <p class="text-sm text-gray-600">
+                    {{ c.percentage }}% Attendance Completed
+                </p>
+
+            </div>
+            {% empty %}
+                <p class="text-gray-500">No class data available</p>
+            {% endfor %}
+
+        </div>
+
+        <!-- 🔥 SUMMARY -->
+        <div class="grid grid-cols-2 gap-6 mt-6">
+
+            <div class="bg-white p-5 rounded shadow text-center">
+                <p class="text-gray-500 text-sm">Today's Attendance</p>
+
+                {% if attendance_today %}
+                    <p class="text-green-600 text-xl font-bold">✅ Completed</p>
+                {% else %}
+                    <p class="text-red-500 text-xl font-bold">❌ Not Taken</p>
+                {% endif %}
+            </div>
+
+            <div class="bg-white p-5 rounded shadow text-center">
+                <p class="text-gray-500 text-sm">Total Records</p>
+                <p class="text-xl font-bold">{{ total_taken }}</p>
+            </div>
+
+        </div>
+
+        <!-- 🔥 ACTION -->
+        <div class="mt-6">
+            <a href="{% url 'take_attendance' %}"
+               class="block text-center bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded shadow font-semibold">
+               📋 Go to Attendance
+            </a>
+        </div>
+
+        <!-- 🔥 CHARTS SECTION -->
+        <div class="grid grid-cols-2 gap-6 mt-6">
+
+            <!-- LINE CHART -->
+            <div class="bg-white p-5 rounded shadow">
+                <h3 class="font-bold mb-4">📈 Daily Attendance</h3>
+                <canvas id="attendanceChart"></canvas>
+            </div>
+
+            <!-- PIE CHART -->
+            <div class="bg-white p-5 rounded shadow">
+                <h3 class="font-bold mb-4">🥧 Class Distribution</h3>
+                <canvas id="classPieChart"></canvas>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- CHART -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+// 🔹 LINE CHART
+new Chart(document.getElementById('attendanceChart'), {
+    type: 'line',
+    data: {
+        labels: [{% for d in daily %} "{{ d.date }}", {% endfor %}],
+        datasets: [{
+            label: 'Attendance Entries',
+            data: [{% for d in daily %} {{ d.count }}, {% endfor %}],
+            borderWidth: 2,
+            tension: 0.3
+        }]
+    }
+});
+
+// 🔹 PIE CHART
+new Chart(document.getElementById('classPieChart'), {
+    type: 'pie',
+    data: {
+        labels: [{% for c in class_labels %} "{{ c }}", {% endfor %}],
+        datasets: [{
+            data: [{% for d in class_data %} {{ d }}, {% endfor %}],
+            borderWidth: 1
+        }]
+    }
+});
+</script>
+
+{% endblock %}

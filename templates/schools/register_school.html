@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-blue-100 p-6">
+
+    <div class="w-full max-w-6xl bg-white rounded-2xl shadow-2xl overflow-hidden grid md:grid-cols-2">
+
+        <!-- LEFT PANEL -->
+        <div class="bg-blue-900 text-white p-8 flex flex-col justify-between">
+
+            <div class="flex flex-col items-center text-center">
+
+                <img src="{% static 'images/logo.png' %}" 
+                     class="w-28 h-28 object-contain mb-4 drop-shadow-lg">
+
+                <h2 class="text-2xl font-bold mb-2">Nexolabs Academy</h2>
+
+                <p class="text-sm text-blue-200 mb-6 max-w-xs">
+                    Build your school, manage students, and grow digitally 🚀
+                </p>
+
+                <img src="https://cdn.dribbble.com/users/1615584/screenshots/15568123/media/ccf4f4d70a1e3e0d3a7d9b3dcb3b77b5.png"
+                     class="rounded-lg mb-6 w-full shadow-lg">
+
+                <div class="bg-white/10 p-4 rounded-lg text-sm flex items-center w-full">
+                    <span class="bg-white text-blue-900 px-3 py-1 rounded-full mr-3">1</span>
+                    Enter your school details and create your admin account
+                </div>
+
+            </div>
+
+            <div class="mt-8">
+
+                <img src="https://cdn.dribbble.com/users/1615584/screenshots/15568123/media/7eac191f85632d436a3d79042f2f20c4.png"
+                     class="rounded-lg mb-4 w-full shadow-lg">
+
+                <div class="bg-white/10 p-4 rounded-lg text-sm flex items-center">
+                    <span class="bg-pink-500 text-white px-3 py-1 rounded-full mr-3">2</span>
+                    Wait for approval & start managing your platform
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- RIGHT FORM -->
+        <div class="p-10">
+
+            <h2 class="text-3xl font-bold mb-6 text-gray-800">Register Your School</h2>
+
+            <!-- 🔥 MESSAGE BLOCK -->
+            {% if messages %}
+                <div class="mb-4">
+                    {% for message in messages %}
+                        <div class="p-3 rounded text-white
+                            {% if message.tags == 'success' %}bg-green-500
+                            {% else %}bg-red-500{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <form method="POST" enctype="multipart/form-data" class="grid grid-cols-2 gap-4">
+                {% csrf_token %}
+
+                <div class="col-span-2">
+                    <label class="text-sm text-gray-600">School Name</label>
+                    <input name="name" class="w-full mt-1 p-3 border rounded">
+                </div>
+
+                <div>
+                    <label class="text-sm text-gray-600">School Email</label>
+                    <input name="email" class="w-full mt-1 p-3 border rounded">
+                </div>
+
+                <div>
+                    <label class="text-sm text-gray-600">Phone Number</label>
+                    <input name="phone" class="w-full mt-1 p-3 border rounded">
+                </div>
+
+                <div class="col-span-2">
+                    <label class="text-sm text-gray-600">Address</label>
+                    <input name="address" class="w-full mt-1 p-3 border rounded">
+                </div>
+
+                <div class="col-span-2">
+                    <label class="text-sm text-gray-600">Upload School Logo</label>
+                    <input type="file" name="logo" accept="image/*"
+                        onchange="previewLogo(event)"
+                        class="w-full mt-1 p-2 border rounded">
+
+                    <img id="logoPreview" class="mt-3 h-16 hidden rounded shadow">
+                </div>
+
+                <div>
+                    <label class="text-sm text-gray-600">Username</label>
+                    <input name="username" class="w-full mt-1 p-3 border rounded">
+                </div>
+
+                <div>
+                    <label class="text-sm text-gray-600">Admin Email</label>
+                    <input name="admin_email" class="w-full mt-1 p-3 border rounded">
+                </div>
+
+                <div>
+                    <label class="text-sm text-gray-600">Password</label>
+                    <input type="password" name="password" class="w-full mt-1 p-3 border rounded">
+                </div>
+
+                <div>
+                    <label class="text-sm text-gray-600">Confirm Password</label>
+                    <input type="password" name="confirm_password" class="w-full mt-1 p-3 border rounded">
+                </div>
+
+                <div class="col-span-2 flex justify-between mt-6">
+                    <a href="/login/school_admin/"
+                       class="w-1/2 mr-2 border text-center py-3 rounded-lg hover:bg-gray-100">
+                        Cancel
+                    </a>
+
+                    <button class="w-1/2 bg-blue-900 text-white py-3 rounded-lg hover:bg-blue-800">
+                        Register
+                    </button>
+                </div>
+
+            </form>
+
+            <div class="text-center mt-6 text-sm text-gray-500">
+                © 2026 Nexolabs Academy • info@nexolabs.com.np
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+function previewLogo(event) {
+    const preview = document.getElementById('logoPreview');
+    preview.src = URL.createObjectURL(event.target.files[0]);
+    preview.classList.remove('hidden');
+}
+</script>
+
+{% endblock %}

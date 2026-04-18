@@ -1,0 +1,181 @@
+<h2 class="text-xl font-bold mb-4">📊 Attendance Dashboard</h2>
+
+<!-- 🔥 FILTERS -->
+<form method="GET" class="mb-4 flex gap-4">
+
+    <!-- CLASS -->
+    <select name="class" class="border p-2 rounded">
+        <option value="">Select Class</option>
+        {% for c in classes %}
+        <option value="{{ c }}" {% if selected_class == c %}selected{% endif %}>
+            Class {{ c }}
+        </option>
+        {% endfor %}
+    </select>
+
+    <!-- SECTION -->
+    <select name="section" class="border p-2 rounded">
+        <option value="">Select Section</option>
+        {% for s in sections %}
+        <option value="{{ s }}" {% if selected_section == s %}selected{% endif %}>
+            {{ s }}
+        </option>
+        {% endfor %}
+    </select>
+
+    <button class="bg-indigo-600 text-white px-4 py-2 rounded">
+        Filter
+    </button>
+
+</form>
+
+<!-- 🔥 PERCENTAGE -->
+<div class="bg-gray-100 p-4 rounded mb-4 text-center">
+    <h3 class="text-gray-600">Overall Attendance</h3>
+    <h1 class="text-3xl font-bold text-green-600">
+        {{ percentage }}%
+    </h1>
+</div>
+
+<!-- 🔥 STUDENT TABLE -->
+<div class="bg-white p-5 rounded shadow mb-6">
+
+    <h3 class="font-bold mb-3">Students Attendance</h3>
+
+    <table class="w-full text-sm border">
+
+        <thead class="bg-gray-100">
+            <tr>
+                <th class="p-2">Name</th>
+                <th>Class</th>
+                <th>Section</th>
+                <th>Total</th>
+                <th>Present</th>
+                <th>%</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for s in student_data %}
+            <tr class="border-t">
+
+                <td class="p-2 font-semibold">
+                    {{ s.student.username }}
+                </td>
+
+                <td class="text-center">{{ s.class }}</td>
+                <td class="text-center">{{ s.section }}</td>
+
+                <td class="text-center">{{ s.total }}</td>
+
+                <td class="text-center text-green-600">
+                    {{ s.present }}
+                </td>
+
+                <td class="text-center font-bold">
+                    {{ s.percentage }}%
+                </td>
+
+                <!-- 🔥 EDIT BUTTON -->
+                <td class="text-center">
+
+                    {% if school.school_can_edit %}
+                    <a href="?edit={{ s.student.id }}" 
+                       class="bg-yellow-500 text-white px-2 py-1 rounded text-xs">
+                        Edit
+                    </a>
+                    {% else %}
+                    <span class="text-gray-400 text-xs">Locked</span>
+                    {% endif %}
+
+                </td>
+
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="text-center p-4">
+                    Select class & section
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+
+    </table>
+
+</div>
+
+<!-- 🔥 EDIT SECTION -->
+{% if request.GET.edit and school.school_can_edit %}
+
+<div class="bg-white p-5 rounded shadow mb-6">
+
+    <h3 class="font-bold mb-3">✏️ Edit Attendance</h3>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <!-- DATE -->
+        <input type="date" name="date" required class="border p-2 mb-4">
+
+        <!-- STUDENTS -->
+        <table class="w-full text-sm border">
+
+            <thead class="bg-gray-100">
+                <tr>
+                    <th>Name</th>
+                    <th>Present</th>
+                    <th>Absent</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for s in students %}
+                <tr class="border-t">
+
+                    <td class="p-2">{{ s.username }}</td>
+
+                    <td class="text-center">
+                        <input type="radio" name="status_{{ s.id }}" value="present">
+                    </td>
+
+                    <td class="text-center">
+                        <input type="radio" name="status_{{ s.id }}" value="absent">
+                    </td>
+
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+
+        <button class="bg-green-600 text-white px-4 py-2 mt-4 rounded">
+            Save Changes
+        </button>
+
+    </form>
+
+</div>
+
+{% endif %}
+
+<!-- 🔥 CHART -->
+<canvas id="attendanceChart"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+const data = {
+    labels: [{% for m in monthly %} "{{ m.date__month }}", {% endfor %}],
+    datasets: [{
+        label: 'Attendance Count',
+        data: [{% for m in monthly %} {{ m.total }}, {% endfor %}],
+        borderWidth: 2
+    }]
+};
+
+new Chart(document.getElementById('attendanceChart'), {
+    type: 'bar',
+    data: data,
+});
+</script>

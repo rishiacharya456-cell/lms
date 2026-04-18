@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="p-8 bg-gray-100 min-h-screen">
+
+    <!-- HEADER -->
+    <div class="mb-6">
+        <h2 class="text-2xl font-bold text-gray-800">
+            Assign Course: {{ course.name }}
+        </h2>
+        <p class="text-gray-500">
+            Select schools to allow this course
+        </p>
+    </div>
+
+    <!-- SCHOOL LIST -->
+    <div class="bg-white rounded-xl shadow p-6">
+
+        <table class="w-full text-sm border-collapse">
+
+            <thead class="bg-gray-100 text-gray-600">
+                <tr>
+                    <th class="p-3 text-left">School</th>
+                    <th class="text-center">Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for school in schools %}
+                <tr class="border-t hover:bg-gray-50">
+
+                    <td class="p-3 font-medium">
+                        {{ school.name }}
+                    </td>
+
+                    <td class="text-center">
+
+                        {% if school.id in assigned_school_ids %}
+                            <span class="text-green-600 font-semibold">
+                                ✔ Already Allowed
+                            </span>
+                        {% else %}
+                            <a href="?school_id={{ school.id }}"
+                               class="bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700 text-sm">
+                                Allow for School
+                            </a>
+                        {% endif %}
+
+                    </td>
+
+                </tr>
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}

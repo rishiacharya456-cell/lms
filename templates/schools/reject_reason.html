@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="p-6 max-w-xl mx-auto">
+
+    <h2 class="text-xl font-bold mb-4">Reject {{ school.name }}</h2>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <textarea name="reason" placeholder="Enter rejection reason..."
+                  class="w-full p-3 border rounded mb-4" required></textarea>
+
+        <button class="bg-red-600 text-white px-4 py-2 rounded">
+            Reject & Send Email
+        </button>
+
+    </form>
+
+</div>
+
+{% endblock %}

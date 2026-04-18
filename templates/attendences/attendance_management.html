@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="p-6">
+
+<h2 class="text-2xl font-bold mb-6">📊 Attendance Management</h2>
+
+<div class="bg-white p-5 rounded shadow">
+
+<table class="w-full text-sm">
+
+<thead class="bg-gray-100">
+<tr>
+    <th class="p-3">School</th>
+    <th>Attendance %</th>
+    <th>Status</th>
+    <th>Permissions</th>
+    <th>Actions</th>
+</tr>
+</thead>
+
+<tbody>
+{% for s in schools %}
+
+<tr class="border-t hover:bg-gray-50">
+
+    <!-- 🔥 CLICKABLE SCHOOL -->
+    <td class="p-3 font-semibold text-indigo-600">
+        <a href="{% url 'admin_school_attendance' s.id %}">
+            {{ s.name }}
+        </a>
+    </td>
+
+    <!-- % -->
+    <td class="text-center font-bold text-indigo-600">
+        {{ s.attendance_percentage }}%
+    </td>
+
+    <!-- STATUS -->
+    <td class="text-center">
+        {% if s.attendance_locked %}
+            <span class="text-red-500">🔒 Locked</span>
+        {% else %}
+            <span class="text-green-600">🔓 Open</span>
+        {% endif %}
+    </td>
+
+    <!-- 🔥 TOGGLE SWITCHES -->
+    <td class="text-center">
+
+        <div class="flex flex-col items-center gap-2">
+
+            <!-- TRAINER TOGGLE -->
+            <form method="POST" action="{% url 'toggle_trainer_permission' s.id %}">
+                {% csrf_token %}
+                <button class="w-16 h-7 rounded-full relative 
+                    {% if s.trainer_can_edit %} bg-green-500 {% else %} bg-gray-300 {% endif %}">
+                    
+                    <span class="absolute top-1 left-1 w-5 h-5 bg-white rounded-full transition
+                        {% if s.trainer_can_edit %} translate-x-9 {% endif %}">
+                    </span>
+                </button>
+                <p class="text-xs mt-1">Trainee</p>
+            </form>
+
+            <!-- SCHOOL TOGGLE -->
+            <form method="POST" action="{% url 'toggle_school_permission' s.id %}">
+                {% csrf_token %}
+                <button class="w-16 h-7 rounded-full relative 
+                    {% if s.school_can_edit %} bg-blue-500 {% else %} bg-gray-300 {% endif %}">
+                    
+                    <span class="absolute top-1 left-1 w-5 h-5 bg-white rounded-full transition
+                        {% if s.school_can_edit %} translate-x-9 {% endif %}">
+                    </span>
+                </button>
+                <p class="text-xs mt-1">School</p>
+            </form>
+
+        </div>
+
+    </td>
+
+    <!-- ACTION -->
+    <td class="text-center">
+
+        <div class="flex gap-2 justify-center">
+
+            <a href="{% url 'admin_school_attendance' s.id %}"
+               class="bg-indigo-600 text-white px-2 py-1 rounded text-xs">
+               View
+            </a>
+
+            <form method="POST" action="{% url 'unlock_attendance' s.id %}">
+                {% csrf_token %}
+                <button class="bg-yellow-500 text-white px-2 py-1 rounded text-xs">
+                    Unlock
+                </button>
+            </form>
+
+        </div>
+
+    </td>
+
+</tr>
+
+{% endfor %}
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,8 @@
+<h2>Approve Students</h2>
+
+{% for reg in regs %}
+  <div>
+    <p>{{ reg.student }} - {{ reg.course }}</p>
+    <a href="{% url 'approve_student' reg.id %}">Approve</a>
+  </div>
+{% endfor %}

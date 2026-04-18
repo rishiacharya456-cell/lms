@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="flex">
+
+    <!-- SAME SIDEBAR -->
+    <div class="w-64 bg-indigo-900 text-white min-h-screen p-6">
+
+        <div class="text-center mb-8">
+            <h2 class="text-lg font-bold">
+                {{ student.first_name }} {{ student.last_name }}
+            </h2>
+            <p class="text-xs text-indigo-200">{{ school.name }}</p>
+        </div>
+
+        <ul class="space-y-3 text-sm">
+
+            <li>
+                <a href="{% url 'student_dashboard' %}" 
+                   class="block hover:bg-indigo-700 p-2 rounded">
+                   Dashboard
+                </a>
+            </li>
+
+            <!-- ACTIVE -->
+            <li>
+                <a href="{% url 'student_attendance' %}" 
+                   class="block bg-indigo-700 p-2 rounded">
+                   📊 Attendance
+                </a>
+            </li>
+
+        </ul>
+
+    </div>
+
+    <!-- MAIN -->
+    <div class="flex-1 bg-gray-100">
+
+        <div class="bg-indigo-800 text-white px-6 py-3 flex justify-between">
+            <h2>Nexolabs Student Portal</h2>
+            <a href="/logout/">Logout</a>
+        </div>
+
+        <div class="p-6">
+
+            <h1 class="text-2xl font-bold mb-6">
+                📊 Attendance Report
+            </h1>
+
+            <!-- SUMMARY -->
+            <div class="grid grid-cols-3 gap-6 mb-6">
+
+                <div class="bg-white p-4 rounded shadow text-center">
+                    <p class="text-gray-500">Total Classes</p>
+                    <p class="text-xl font-bold">{{ total_classes }}</p>
+                </div>
+
+                <div class="bg-white p-4 rounded shadow text-center">
+                    <p class="text-gray-500">Attended</p>
+                    <p class="text-xl font-bold text-green-600">{{ attended }}</p>
+                </div>
+
+                <div class="bg-white p-4 rounded shadow text-center">
+                    <p class="text-gray-500">Percentage</p>
+                    <p class="text-xl font-bold text-indigo-600">
+                        {{ percentage }}%
+                    </p>
+                </div>
+
+            </div>
+
+            <!-- 🔥 DAILY RECORDS -->
+            <div class="bg-white p-6 rounded shadow">
+
+                <h3 class="font-bold mb-4">Attendance Records</h3>
+
+                <table class="w-full text-sm border">
+
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="p-2">Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for a in records %}
+                        <tr class="border-t">
+
+                            <td class="p-2">
+                                {{ a.date }}
+                            </td>
+
+                            <td class="text-center
+                                {% if a.status == 'present' %}
+                                    text-green-600
+                                {% else %}
+                                    text-red-500
+                                {% endif %}
+                            ">
+                                {{ a.status|title }}
+                            </td>
+
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="2" class="text-center p-4 text-gray-500">
+                                No attendance records
+                            </td>
+                        </tr>
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

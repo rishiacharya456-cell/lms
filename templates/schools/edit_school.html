@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="p-6 max-w-2xl mx-auto">
+
+    <h2 class="text-2xl font-bold mb-6">✏️ Edit School</h2>
+
+    <form method="POST" class="grid gap-4">
+        {% csrf_token %}
+
+        <input name="name" value="{{ school.name }}" class="p-3 border rounded">
+        <input name="email" value="{{ school.email }}" class="p-3 border rounded">
+        <input name="phone" value="{{ school.phone }}" class="p-3 border rounded">
+        <input name="address" value="{{ school.address }}" class="p-3 border rounded">
+
+        <button class="bg-blue-600 text-white p-3 rounded">
+            Update School
+        </button>
+
+    </form>
+
+</div>
+
+{% endblock %}

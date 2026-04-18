@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="p-8">
+
+    <div class="bg-white rounded-xl shadow p-6 max-w-xl mx-auto">
+
+        <h2 class="text-xl font-bold mb-4">
+            {{ course.name }}
+        </h2>
+
+        <p><b>Credit:</b> {{ course.credit_hour }}</p>
+        <p><b>Full Marks:</b> {{ course.full_marks }}</p>
+        <p><b>Internal Marks:</b> {{ course.internal_marks }}</p>
+        <p><b>Pass Marks:</b> {{ course.pass_marks }}</p>
+
+    </div>
+
+</div>
+
+{% endblock %}

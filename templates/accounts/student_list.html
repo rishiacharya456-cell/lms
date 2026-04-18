@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="p-6">
+
+    <!-- HEADER -->
+    <div class="flex justify-between items-center mb-5">
+        <h2 class="text-2xl font-bold text-gray-800">Students</h2>
+
+        <a href="{% url 'add_student' %}" 
+           class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition">
+            ➕ Add Student
+        </a>
+    </div>
+
+    <!-- TABLE -->
+    <div class="bg-white rounded-xl shadow overflow-hidden">
+
+        <table class="w-full text-sm border-collapse">
+
+            <!-- HEADER -->
+            <thead class="bg-gray-100 text-gray-600">
+                <tr>
+                    <th class="p-3 text-left">Photo</th>
+                    <th class="text-left">Reg No</th>
+                    <th class="text-left">Name</th>
+                    <th class="text-center">Class</th>
+                    <th class="text-center">Section</th>
+                    <th class="text-center">Status</th>
+                    <th class="text-center">Actions</th>
+                </tr>
+            </thead>
+
+            <!-- BODY -->
+            <tbody>
+                {% for student in students %}
+                <tr class="border-t hover:bg-gray-100 transition">
+
+                    <!-- PHOTO -->
+                    <td class="p-3">
+                        {% if student.photo %}
+                            <img src="{{ student.photo.url }}" 
+                                 class="w-11 h-11 rounded-full object-cover border">
+                        {% else %}
+                            <div class="w-11 h-11 bg-gray-300 rounded-full"></div>
+                        {% endif %}
+                    </td>
+
+                    <!-- REG NO -->
+                    <td class="font-semibold text-gray-800 tracking-wide">
+                        {{ student.username }}
+                    </td>
+
+                    <!-- NAME -->
+                    <td class="font-medium text-gray-700">
+                        {{ student.first_name }}
+                    </td>
+
+                    <!-- CLASS -->
+                    <td class="text-center font-medium">
+                        {{ student.student_class }}
+                    </td>
+
+                    <!-- SECTION -->
+                    <td class="text-center font-medium">
+                        {{ student.section }}
+                    </td>
+
+                    <!-- STATUS -->
+                    <td class="text-center">
+                        {% if student.is_active_student %}
+                            <span class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-xs font-semibold">
+                                Active
+                            </span>
+                        {% else %}
+                            <span class="bg-red-100 text-red-600 px-3 py-1 rounded-full text-xs font-semibold">
+                                Inactive
+                            </span>
+                        {% endif %}
+                    </td>
+
+                    <!-- ACTIONS -->
+                    <td class="text-center space-x-2">
+
+                        <a href="{% url 'edit_student' student.id %}" 
+                           class="bg-yellow-400 text-white px-3 py-1 rounded text-xs hover:bg-yellow-500 transition">
+                            Edit
+                        </a>
+
+                        <a href="{% url 'delete_student' student.id %}" 
+                           class="bg-red-500 text-white px-3 py-1 rounded text-xs hover:bg-red-600 transition">
+                            Delete
+                        </a>
+
+                    </td>
+
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center p-6 text-gray-500">
+                        No students found
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}

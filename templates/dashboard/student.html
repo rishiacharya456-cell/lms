@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="flex">
+
+    <!-- SIDEBAR -->
+    <div class="w-64 bg-indigo-900 text-white min-h-screen p-6">
+
+        <!-- PROFILE -->
+        <div class="text-center mb-8">
+
+            {% if student.photo %}
+                <img src="{{ student.photo.url }}" 
+                     class="w-20 h-20 mx-auto rounded-full mb-3 border-4 border-white">
+            {% else %}
+                <div class="w-20 h-20 mx-auto bg-white text-indigo-900 flex items-center justify-center rounded-full mb-3 text-xl font-bold">
+                    {{ student.first_name|slice:":1" }}
+                </div>
+            {% endif %}
+
+            <h2 class="text-lg font-bold">
+                {{ student.first_name }} {{ student.last_name }}
+            </h2>
+
+            <p class="text-xs text-indigo-200">
+                {{ school.name }}
+            </p>
+
+        </div>
+
+        <!-- MENU -->
+        <ul class="space-y-3 text-sm">
+
+            <li>
+                <a href="{% url 'student_dashboard' %}" 
+                   class="block bg-indigo-700 p-2 rounded">
+                   Dashboard
+                </a>
+            </li>
+
+            <!-- ✅ FIXED ATTENDANCE LINK -->
+            <li>
+                <a href="{% url 'student_attendance' %}" 
+                   class="block hover:bg-indigo-700 p-2 rounded">
+                   📊 Attendance
+                </a>
+            </li>
+
+            <li>
+                <a href="{% url 'student_courses' %}" 
+   class="block hover:bg-indigo-700 p-2 rounded">
+   📚 Course Registration
+</a>
+            </li>
+
+            <li>
+                <a href="#" class="block hover:bg-indigo-700 p-2 rounded">
+                   📝 Exams
+                </a>
+            </li>
+
+            <li>
+                <a href="#" class="block hover:bg-indigo-700 p-2 rounded">
+                   📖 Syllabus
+                </a>
+            </li>
+
+            <li>
+                <a href="#" class="block hover:bg-indigo-700 p-2 rounded">
+                   💻 Practice Materials
+                </a>
+            </li>
+
+            <li>
+                <a href="#" class="block hover:bg-indigo-700 p-2 rounded">
+                   📊 Results
+                </a>
+            </li>
+
+        </ul>
+
+    </div>
+
+    <!-- MAIN -->
+    <div class="flex-1 bg-gray-100">
+
+        <!-- TOP BAR -->
+        <div class="bg-indigo-800 text-white px-6 py-3 flex justify-between">
+            <h2 class="font-semibold">Nexolabs Student Portal</h2>
+            <a href="/logout/" class="text-sm">Logout</a>
+        </div>
+
+        <div class="p-6">
+
+            <!-- HEADER -->
+            <div class="mb-6">
+                <h1 class="text-2xl font-bold">Dashboard</h1>
+                <p class="text-gray-600">
+                    Welcome, {{ student.first_name }}
+                </p>
+            </div>
+
+            <!-- INFO CARDS -->
+            <div class="grid grid-cols-3 gap-6 mb-6">
+
+                <div class="bg-white p-5 rounded-xl shadow">
+                    <h3 class="text-gray-500">Reg No</h3>
+                    <p class="text-xl font-bold">{{ student.username }}</p>
+                </div>
+
+                <div class="bg-white p-5 rounded-xl shadow">
+                    <h3 class="text-gray-500">Class</h3>
+                    <p class="text-xl font-bold">{{ student.student_class }}</p>
+                </div>
+
+                <div class="bg-white p-5 rounded-xl shadow">
+                    <h3 class="text-gray-500">Section</h3>
+                    <p class="text-xl font-bold">{{ student.section }}</p>
+                </div>
+
+            </div>
+
+            <!-- PROFILE -->
+            <div class="bg-white p-6 rounded-xl shadow mb-6">
+
+                <h2 class="font-bold mb-4 text-lg border-b pb-2">
+                    Student Profile
+                </h2>
+
+                <div class="grid grid-cols-2 gap-y-3 text-sm">
+
+                    <div><b>Name:</b></div>
+                    <div>{{ student.first_name }} {{ student.last_name }}</div>
+
+                    <div><b>Date of Birth:</b></div>
+                    <div>{{ student.dob }}</div>
+
+                    <div><b>Father Name:</b></div>
+                    <div>{{ student.father_name }}</div>
+
+                    <div><b>Mother Name:</b></div>
+                    <div>{{ student.mother_name }}</div>
+
+                    <div><b>Contact:</b></div>
+                    <div>{{ student.phone }}</div>
+
+                    <div><b>Address:</b></div>
+                    <div>{{ student.address }}</div>
+
+                </div>
+
+            </div>
+
+            <!-- 🔥 ATTENDANCE SECTION (UNCHANGED) -->
+            <div id="attendance" class="bg-white p-6 rounded-xl shadow">
+
+                <h2 class="font-bold mb-4 text-lg border-b pb-2">
+                    📊 Attendance Report
+                </h2>
+
+                <table class="w-full text-sm border">
+
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="p-3 text-left">Name</th>
+                            <th>Reg No</th>
+                            <th>Class</th>
+                            <th>Section</th>
+                            <th>Total Classes</th>
+                            <th>Attended</th>
+                            <th>Percentage</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        <tr class="border-t">
+
+                            <td class="p-3 font-semibold">
+                                {{ student.first_name }} {{ student.last_name }}
+                            </td>
+
+                            <td class="text-center">{{ student.username }}</td>
+                            <td class="text-center">{{ student.student_class }}</td>
+                            <td class="text-center">{{ student.section }}</td>
+
+                            <td class="text-center">{{ total_classes }}</td>
+
+                            <td class="text-center text-green-600 font-semibold">
+                                {{ attended }}
+                            </td>
+
+                            <td class="text-center font-bold
+                                {% if percentage >= 75 %}
+                                    text-green-600
+                                {% elif percentage >= 50 %}
+                                    text-yellow-500
+                                {% else %}
+                                    text-red-500
+                                {% endif %}
+                            ">
+                                {{ percentage }}%
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

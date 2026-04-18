@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="p-6">
+
+<h2 class="text-xl font-bold mb-4">
+    {{ school.name }} - Attendance
+</h2>
+
+<form method="GET" class="mb-4">
+    <input type="date" name="date" value="{{ selected_date|date:'Y-m-d' }}"
+           class="border p-2 rounded">
+    <button class="bg-indigo-600 text-white px-3 py-1 rounded">
+        View
+    </button>
+</form>
+
+<form method="POST">
+{% csrf_token %}
+
+<table class="w-full border text-sm">
+
+<thead class="bg-gray-100">
+<tr>
+    <th class="p-2">Student</th>
+    <th>Present</th>
+    <th>Absent</th>
+</tr>
+</thead>
+
+<tbody>
+{% for s in students %}
+<tr class="border-t">
+
+<td class="p-2">{{ s.username }}</td>
+
+<td class="text-center">
+    <input type="radio" name="status_{{ s.id }}" value="present"
+    {% if attendance.s.id == "present" %} checked {% endif %}>
+</td>
+
+<td class="text-center">
+    <input type="radio" name="status_{{ s.id }}" value="absent"
+    {% if attendance.s.id == "absent" %} checked {% endif %}>
+</td>
+
+</tr>
+{% endfor %}
+</tbody>
+
+</table>
+
+<button class="bg-green-600 text-white px-4 py-2 mt-4 rounded">
+    Save Changes
+</button>
+
+</form>
+
+</div>
+
+{% endblock %}

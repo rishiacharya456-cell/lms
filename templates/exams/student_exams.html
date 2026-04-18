@@ -1,0 +1,11 @@
+<h2>My Exams</h2>
+
+{% for exam in exams %}
+  <div>
+    <h3>{{ exam.course_name }}</h3>
+    <p>Fee: {{ exam.exam_fee }}</p>
+    <p>Status: {% if exam.is_paid %}Paid{% else %}Pending{% endif %}</p>
+  </div>
+{% empty %}
+  <p>No exams available</p>
+{% endfor %}

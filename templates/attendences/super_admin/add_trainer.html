@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="flex">
+
+    <!-- SIDEBAR (UNCHANGED) -->
+    <div class="w-64 bg-gray-900 text-white min-h-screen p-5">
+        <h2 class="text-xl font-bold mb-6">Nexolabs</h2>
+
+        <ul class="space-y-3 text-sm">
+            <li><a href="{% url 'super_admin' %}" class="block hover:bg-gray-700 p-2 rounded">Dashboard</a></li>
+            <li><a href="#" class="block hover:bg-gray-700 p-2 rounded">Schools</a></li>
+            <li><a href="#" class="block hover:bg-gray-700 p-2 rounded">Users</a></li>
+            <li><a href="#" class="block hover:bg-gray-700 p-2 rounded">Courses</a></li>
+            <li><a href="{% url 'attendance_list' %}" class="block hover:bg-gray-700 p-2 rounded">Attendance</a></li>
+        </ul>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="flex-1 p-6 bg-gray-100">
+
+        <h1 class="text-2xl font-bold mb-6">Add Trainer</h1>
+
+        <!-- FORM CARD -->
+        <div class="bg-white p-6 rounded shadow">
+
+            {% if error %}
+            <div class="bg-red-100 text-red-600 p-2 mb-4 rounded">
+                {{ error }}
+            </div>
+            {% endif %}
+
+            <form method="POST" enctype="multipart/form-data"
+                  class="grid grid-cols-2 gap-5">
+
+                {% csrf_token %}
+
+                <!-- FULL NAME -->
+                <div>
+                    <label class="text-sm font-semibold">Full Name</label>
+                    <input name="name" placeholder="Enter full name" required
+                           class="border p-2 rounded w-full">
+                </div>
+
+                <!-- EMAIL -->
+                <div>
+                    <label class="text-sm font-semibold">Email</label>
+                    <input name="email" type="email" placeholder="Enter email" required
+                           class="border p-2 rounded w-full">
+                </div>
+
+                <!-- PHONE -->
+                <div>
+                    <label class="text-sm font-semibold">Phone Number</label>
+                    <input name="phone" placeholder="Enter phone number" required
+                           class="border p-2 rounded w-full">
+                </div>
+
+                <!-- DOB -->
+                <div>
+                    <label class="text-sm font-semibold text-blue-600">
+                        Date of Birth (Used as Password)
+                    </label>
+                    <input type="date" name="dob" required
+                           class="border p-2 rounded w-full">
+                </div>
+
+                <!-- ADDRESS -->
+                <div class="col-span-2">
+                    <label class="text-sm font-semibold">Address</label>
+                    <input name="address" placeholder="Enter full address"
+                           class="border p-2 rounded w-full">
+                </div>
+
+                <!-- QUALIFICATION -->
+                <div>
+                    <label class="text-sm font-semibold">Qualification</label>
+                    <input name="qualification" placeholder="Enter qualification"
+                           class="border p-2 rounded w-full">
+                </div>
+
+                <!-- EXPERIENCE -->
+                <div>
+                    <label class="text-sm font-semibold">Experience</label>
+                    <input name="experience" placeholder="Years of experience"
+                           class="border p-2 rounded w-full">
+                </div>
+
+                <!-- SALARY -->
+                <div>
+                    <label class="text-sm font-semibold">Salary (Rs.)</label>
+                    <input name="salary" placeholder="Enter salary" required
+                           class="border p-2 rounded w-full">
+                </div>
+
+                <!-- JOINING DATE -->
+                <div>
+                    <label class="text-sm font-semibold text-green-600">
+                        Joining Date (Official Start Date)
+                    </label>
+                    <input type="date" name="joining_date" required
+                           class="border p-2 rounded w-full">
+                </div>
+
+                <!-- PHOTO -->
+                <div>
+                    <label class="text-sm font-semibold">Trainer Photo</label>
+                    <input type="file" name="photo" required
+                           class="border p-2 rounded w-full">
+                </div>
+
+                <!-- DOCUMENT -->
+                <div>
+                    <label class="text-sm font-semibold">Document (ID/Certificate)</label>
+                    <input type="file" name="document" required
+                           class="border p-2 rounded w-full">
+                </div>
+
+                <!-- SUBMIT -->
+                <button type="submit"
+                        class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-3 rounded col-span-2 mt-3">
+                    💾 Save & Generate Appointment Letter
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
