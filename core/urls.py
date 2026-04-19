@@ -11,6 +11,8 @@ urlpatterns = [
     path('schools/', include('apps.schools.urls')),
     path('attendance/', include('attendance.urls')),
     path('courses/', include('apps.courses.urls')), 
+    path('exams/', include('apps.exams.urls')),
+    path('results/', include('apps.results.urls')),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

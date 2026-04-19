@@ -1,0 +1,49 @@
+<h2>💳 Payment Approval</h2>
+
+<table class="w-full text-sm">
+
+<thead>
+<tr>
+<th>Student</th>
+<th>Course</th>
+<th>Amount</th>
+<th>Receipt</th>
+<th>Status</th>
+<th>Exam Date</th>
+<th>Action</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for p in payments %}
+<tr>
+
+<td>{{ p.student.first_name }} ({{ p.student.username }})</td>
+<td>{{ p.course.name }}</td>
+<td>Rs. {{ p.amount }}</td>
+
+<td>
+<a href="{{ p.receipt.url }}" target="_blank">View</a>
+</td>
+
+<td>{{ p.status }}</td>
+
+<td>
+<form method="POST" action="{% url 'set_exam_date' p.id %}">
+{% csrf_token %}
+<input type="date" name="exam_date" value="{{ p.exam_date }}">
+<button>Save</button>
+</form>
+</td>
+
+<td>
+<a href="{% url 'approve_payment' p.id %}">Approve</a>
+<a href="{% url 'reject_payment' p.id %}">Reject</a>
+</td>
+
+</tr>
+{% endfor %}
+
+</tbody>
+</table>

@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="p-6 bg-gray-100 min-h-screen">
+
+    <!-- HEADER -->
+    <div class="mb-6">
+        <h2 class="text-2xl font-bold text-gray-800">
+            📊 Results Management
+        </h2>
+        <p class="text-gray-500 text-sm">
+            Enter marks for students. Submitted marks are locked. Unpaid students are detained.
+        </p>
+    </div>
+
+    <!-- FILTERS -->
+    <div class="flex gap-3 mb-6 flex-wrap">
+
+        <!-- CLASS FILTER -->
+        <select onchange="changeClass(this.value)"
+                class="p-2 border rounded">
+            <option value="">Select Class</option>
+            {% for c in classes %}
+                <option value="{{ c }}" {% if selected_class == c %}selected{% endif %}>
+                    Class {{ c }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <!-- SECTION FILTER -->
+        <select onchange="changeSection(this.value)"
+                class="p-2 border rounded"
+                {% if not selected_class %}disabled{% endif %}>
+            <option value="">Select Section</option>
+            {% for s in sections %}
+                <option value="{{ s }}" {% if selected_section == s %}selected{% endif %}>
+                    Section {{ s }}
+                </option>
+            {% endfor %}
+        </select>
+
+    </div>
+
+    <!-- TABLE -->
+    <div class="bg-white rounded-xl shadow p-6 overflow-x-auto">
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <table class="w-full text-sm">
+
+                <thead class="bg-gray-100">
+                    <tr>
+                        <th class="p-2 text-left">Student</th>
+                        <th>Course</th>
+                        <th>Marks</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for item in student_data %}
+                    <tr class="border-t">
+
+                        <!-- STUDENT -->
+                        <td class="p-2 font-medium text-gray-700">
+                            {{ item.student.first_name }}
+                        </td>
+
+                        <!-- COURSE -->
+                        <td>
+                            {% if item.course %}
+                                {{ item.course.name }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+
+                        <!-- MARKS -->
+                        <td>
+                            {% if item.is_detained %}
+                                <span class="text-red-600 font-semibold">
+                                    Detained
+                                </span>
+
+                            {% elif item.is_locked %}
+                                <input type="number"
+                                       value="{{ item.marks }}"
+                                       class="border p-1 w-20 text-center bg-gray-100 cursor-not-allowed"
+                                       readonly>
+
+                            {% else %}
+                                <input type="number"
+                                       name="th_{{ item.reg_id }}"
+                                       value="{{ item.marks }}"
+                                       placeholder="Enter"
+                                       class="border p-1 w-20 text-center">
+                            {% endif %}
+                        </td>
+
+                        <!-- STATUS -->
+                        <td>
+                            {% if item.is_detained %}
+                                <span class="text-red-600 font-semibold">
+                                    Detained
+                                </span>
+
+                            {% elif item.is_locked %}
+                                <span class="text-green-600 font-semibold">
+                                    Submitted
+                                </span>
+
+                            {% else %}
+                                <span class="text-yellow-600 font-semibold">
+                                    Pending
+                                </span>
+                            {% endif %}
+                        </td>
+
+                    </tr>
+                    {% endfor %}
+
+                    {% if not student_data %}
+                    <tr>
+                        <td colspan="4" class="text-center p-6 text-gray-500">
+                            No students found for selected class/section
+                        </td>
+                    </tr>
+                    {% endif %}
+
+                </tbody>
+
+            </table>
+
+            <!-- SAVE BUTTON -->
+            <div class="mt-6">
+                <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded">
+                    💾 Save Marks
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+<!-- ✅ JS FIX (IMPORTANT) -->
+<script>
+function changeClass(cls) {
+    if (cls) {
+        window.location.href = "?class=" + cls;
+    } else {
+        window.location.href = "?";
+    }
+}
+
+function changeSection(sec) {
+    const params = new URLSearchParams(window.location.search);
+    const cls = params.get("class");
+
+    if (cls) {
+        window.location.href = "?class=" + cls + "&section=" + sec;
+    }
+}
+</script>
+
+{% endblock %}

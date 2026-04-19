@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     'apps.payments',
     'attendance',
     'apps.exams',
+    'apps.results',
 ]
 # Middleware
 MIDDLEWARE = [

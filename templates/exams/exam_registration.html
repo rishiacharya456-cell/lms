@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="p-8 bg-gray-100 min-h-screen flex justify-center">
+
+    <div class="w-full max-w-3xl bg-white rounded-xl shadow-lg overflow-hidden">
+
+        <!-- 🔷 HEADER -->
+        <div class="bg-indigo-600 text-white p-5 flex justify-between items-center">
+
+            <div class="flex items-center gap-3">
+                <img src="/static/images/logo.png" class="w-10 h-10 bg-white p-1 rounded">
+                <div>
+                    <h2 class="text-lg font-bold">Nexolabs Academy</h2>
+                    <p class="text-xs">Gaighat, Udayapur</p>
+                </div>
+            </div>
+
+            <div class="text-right">
+                <h3 class="font-semibold">{{ student.school.name }}</h3>
+                <p class="text-xs">{{ student.school.address }}</p>
+            </div>
+
+        </div>
+
+        <!-- 🔷 TITLE -->
+        <div class="text-center py-3 border-b">
+            <h2 class="text-lg font-bold text-gray-700">
+                🎫 Exam Registration / Hall Ticket
+            </h2>
+        </div>
+
+        <!-- 🔷 STUDENT INFO -->
+        <div class="p-5 flex gap-6">
+
+            {% if student.student_photo %}
+                <img src="{{ student.student_photo.url }}"
+                     class="w-28 h-28 object-cover border rounded">
+            {% else %}
+                <div class="w-28 h-28 bg-gray-200 flex items-center justify-center rounded">
+                    👤
+                </div>
+            {% endif %}
+
+            <div class="grid grid-cols-2 gap-x-8 text-sm">
+                <p><b>Name:</b> {{ student.first_name }}</p>
+                <p><b>Reg No:</b> {{ student.username }}</p>
+
+                <p><b>Class:</b> {{ student.student_class }}</p>
+                <p><b>Section:</b> {{ student.section }}</p>
+
+                <p><b>Gender:</b> {{ student.gender }}</p>
+                <p><b>DOB:</b> {{ student.dob }}</p>
+
+                <p class="col-span-2"><b>Father:</b> {{ student.father_name }}</p>
+            </div>
+
+        </div>
+
+        <!-- 🔷 COURSES -->
+        <div class="px-5 pb-5">
+            <h3 class="font-semibold mb-2 text-gray-700">📚 Registered Courses</h3>
+
+            <div class="border rounded overflow-hidden">
+                <table class="w-full text-sm">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="p-2 text-left">Course</th>
+                            <th class="p-2 text-right">Fee</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for reg in approved_courses %}
+                        <tr class="border-t">
+                            <td class="p-2">{{ reg.course.name }}</td>
+                            <td class="p-2 text-right">Rs. {{ reg.course.exam_fee }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 🔷 TOTAL -->
+        <div class="bg-indigo-50 border-t px-5 py-4 flex justify-between items-center">
+            <div>
+                <p class="text-sm text-gray-600">Total Payable Amount</p>
+                <p class="text-xl font-bold text-indigo-700">
+                    Rs. {{ total_amount }}
+                </p>
+            </div>
+
+            <div class="text-sm text-gray-500">
+                {{ approved_courses|length }} Course{{ approved_courses|length|pluralize }}
+            </div>
+        </div>
+
+        <!-- 🔥 PAYMENT STATUS HANDLING -->
+
+        {% if existing and existing.is_paid %}
+
+            {% if existing.is_verified %}
+                <!-- ✅ VERIFIED + EXAM DATE -->
+                <div class="p-5 text-center">
+
+                    <div class="bg-green-100 text-green-700 py-3 rounded-lg font-semibold mb-2">
+                        ✅ Exam Fee Paid & Verified
+                    </div>
+
+                    <div class="bg-indigo-100 text-indigo-700 py-2 rounded-lg font-semibold">
+                        📅 Exam Date: {{ existing.exam_date|default:"Not Set Yet" }}
+                    </div>
+
+                    <p class="text-sm text-gray-500 mt-2">
+                        Hall Ticket will be provided by school
+                    </p>
+
+                </div>
+
+            {% else %}
+                <!-- ⏳ WAITING -->
+                <div class="p-5 text-center">
+                    <div class="bg-yellow-100 text-yellow-700 py-3 rounded-lg font-semibold">
+                        ⏳ Payment Submitted — Waiting for Approval
+                    </div>
+                </div>
+            {% endif %}
+
+        {% else %}
+
+            <!-- 🔥 QR PAYMENT SECTION -->
+            <div class="p-5">
+
+                <div class="bg-gray-50 border rounded-lg p-4 text-center mb-4">
+
+                    <h3 class="font-semibold mb-2">📲 Scan & Pay</h3>
+
+                    <img src="/static/images/payment_qr.jpeg"
+                         class="w-40 mx-auto mb-3">
+
+                    <p class="text-sm text-gray-700">
+                        Pay <b>Rs. {{ total_amount }}</b>
+                    </p>
+
+                    <p class="text-xs text-red-500 mt-2">
+                        Kindly write your <b>Name - RegNo - School</b> in remarks
+                    </p>
+
+                </div>
+
+                <!-- 🔥 FORM -->
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="text-sm font-medium">Upload Receipt</label>
+                        <input type="file" name="receipt" required
+                               class="w-full border p-2 rounded mt-1">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="text-sm font-medium">Remarks</label>
+                        <input type="text" name="remarks" required
+                               placeholder="Name - RegNo - School"
+                               class="w-full border p-2 rounded mt-1">
+                    </div>
+
+                    <button class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-semibold">
+                        ✅ I Have Paid
+                    </button>
+
+                </form>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}

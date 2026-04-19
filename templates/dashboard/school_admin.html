@@ -47,6 +47,14 @@
 
 
             <li>
+                <a href="{% url 'school_exam_dashboard' %}"
+   class="block hover:bg-indigo-700 p-2 rounded">
+   📝 Exams
+</a>
+</li>
+
+
+            <li>
     <a href="{% url 'school_internal_marks' %}" 
        class="block hover:bg-indigo-600 p-2 rounded">
        📝 Internal Marks
@@ -54,12 +62,13 @@
 </li>
 
             <!-- ✅ NEW: EXAMS -->
-            <li>
-                <a href="#" 
-                   class="block hover:bg-blue-700 p-2 rounded">
-                   📝 Exams
-                </a>
-            </li>
+            <!-- RESULTS -->
+<li>
+    <a href="{% url 'school_results' %}" 
+       class="block hover:bg-indigo-600 p-2 rounded">
+       📊 Results
+    </a>
+</li>
 
             <!-- 🔥 EXISTING -->
             <li>

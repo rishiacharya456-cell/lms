@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    #print-area, #print-area * {
+        visibility: visible;
+    }
+    #print-area {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+    }
+}
+
+.hall-ticket {
+    width: 794px; /* A4 width */
+    min-height: 1123px; /* A4 height */
+    margin: auto;
+    background: white;
+    border: 2px solid #1e3a8a;
+    padding: 30px;
+    font-family: Arial, sans-serif;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #1e3a8a;
+    padding-bottom: 10px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.title {
+    text-align: center;
+    margin: 15px 0;
+}
+
+.student-info {
+    display: flex;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.photo {
+    width: 120px;
+    height: 140px;
+    border: 1px solid #ccc;
+    object-fit: cover;
+}
+
+.details {
+    flex: 1;
+    font-size: 14px;
+}
+
+.details p {
+    margin: 6px 0;
+}
+
+.course-box {
+    margin-top: 20px;
+    border: 1px solid #ccc;
+}
+
+.course-box th {
+    background: #f3f4f6;
+}
+
+.signatures {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 80px;
+    text-align: center;
+}
+
+.signatures div {
+    width: 30%;
+}
+</style>
+
+
+<div class="p-6">
+
+    <button onclick="window.print()"
+            class="mb-4 bg-indigo-600 text-white px-4 py-2 rounded">
+        🖨 Print Hall Ticket
+    </button>
+
+    <div id="print-area" class="hall-ticket">
+
+        <!-- 🔷 HEADER -->
+        <div class="header">
+
+            <!-- NEXOLABS -->
+            <div class="logo">
+                <img src="/static/images/logo.png" width="50">
+                <div>
+                    <h2 style="margin:0;">Nexoalbs Academy</h2>
+                    <small>Gaighat, Udayapur</small>
+                </div>
+            </div>
+
+            <!-- SCHOOL -->
+            <div style="text-align:right;">
+                <h3 style="margin:0;">{{ student.school.name }}</h3>
+                <small>{{ student.school.address }}</small>
+            </div>
+
+        </div>
+
+        <!-- 🔷 TITLE -->
+        <div class="title">
+            <h1 style="margin:10px 0;">🎫 HALL TICKET</h1>
+        </div>
+
+        <!-- 🔷 STUDENT INFO -->
+        <div class="student-info">
+
+            {% if student.student_photo %}
+                <img src="{{ student.student_photo.url }}" class="photo">
+            {% else %}
+                <div class="photo flex items-center justify-center">No Photo</div>
+            {% endif %}
+
+            <div class="details">
+
+                <p><b>Name:</b> {{ student.first_name }}</p>
+                <p><b>Reg No:</b> {{ student.username }}</p>
+                <p><b>Class:</b> {{ student.student_class }}</p>
+                <p><b>Section:</b> {{ student.section }}</p>
+                <p><b>DOB:</b> {{ student.dob }}</p>
+                <p><b>Father Name:</b> {{ student.father_name }}</p>
+
+            </div>
+
+        </div>
+
+        <!-- 🔷 COURSE DETAILS -->
+        <table class="w-full text-sm mt-6 course-box">
+
+            <thead>
+                <tr>
+                    <th class="p-2 text-left">Course</th>
+                    <th class="text-center">Exam Date</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for reg in registrations %}
+                <tr>
+                    <td class="p-2">{{ reg.course.name }}</td>
+                    <td class="text-center">{{ reg.exam_date }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+
+        <!-- 🔷 SIGNATURES -->
+        <div class="signatures">
+
+            <div>
+                <p>______________________</p>
+                <p>Invigilator Signature</p>
+            </div>
+
+            <div>
+                <p>______________________</p>
+                <p>Principal Signature</p>
+            </div>
+
+            <div>
+                <p>______________________</p>
+                <p>Trainee Signature</p>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

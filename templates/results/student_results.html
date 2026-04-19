@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="p-6 bg-gray-100 min-h-screen">
+
+    <!-- HEADER -->
+    <div class="text-center mb-6">
+        <h1 class="text-xl font-bold">Nexoalbs Academy</h1>
+        <h2 class="text-lg font-semibold">
+            {{ student.first_name }} {{ student.last_name }}
+        </h2>
+        <p class="text-sm text-gray-600">
+            Class {{ student.student_class }} - Section {{ student.section }}
+        </p>
+    </div>
+
+    {% if not_published %}
+        <div class="bg-yellow-100 text-yellow-700 p-4 rounded text-center">
+            Results have not been published yet.
+        </div>
+    {% else %}
+
+    <!-- TABLE -->
+    <div class="bg-white p-4 rounded shadow overflow-x-auto">
+
+        <table class="w-full text-sm border">
+
+            <thead class="bg-gray-100 text-center">
+                <tr>
+                    <th class="p-2 text-left">Course</th>
+                    <th>Full</th>
+                    <th>Pass</th>
+                    <th>Theory</th>
+                    <th>Internal</th>
+                    <th>Obtained</th>
+                    <th>Grade</th>
+                    <th>GP</th>
+                    <th>Result</th> <!-- 🔥 NEW -->
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for item in result_data %}
+                <tr class="border-t text-center">
+
+                    <td class="p-2 text-left">{{ item.course.name }}</td>
+                    <td>{{ item.full_marks }}</td>
+                    <td>{{ item.pass_marks }}</td>
+                    <td>{{ item.theory }}</td>
+                    <td>{{ item.internal }}</td>
+
+                    <td class="font-semibold">{{ item.obtained }}</td>
+                    <td>{{ item.grade }}</td>
+                    <td>{{ item.gp }}</td>
+
+                    <!-- ✅ PASS / FAIL -->
+                    <td>
+                        {% if item.is_pass %}
+                            <span class="text-green-600 font-semibold">Pass</span>
+                        {% else %}
+                            <span class="text-red-600 font-semibold">Fail</span>
+                        {% endif %}
+                    </td>
+
+                </tr>
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <!-- SUMMARY -->
+    <div class="mt-6 flex justify-between items-center flex-wrap gap-2">
+
+        <!-- CGPA -->
+        <div class="text-lg font-bold">
+            CGPA: {{ cgpa }}
+        </div>
+
+        <!-- FINAL RESULT -->
+        <div>
+            {% if overall_pass %}
+                <span class="text-green-600 font-bold text-lg">
+                    Final Result: PASS
+                </span>
+            {% else %}
+                <span class="text-red-600 font-bold text-lg">
+                    Final Result: FAIL
+                </span>
+            {% endif %}
+        </div>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

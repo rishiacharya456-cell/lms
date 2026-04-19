@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="p-8 bg-gray-100 min-h-screen">
+
+    <div class="mb-6">
+        <h2 class="text-2xl font-bold text-gray-800">
+            🧾 Result Entry
+        </h2>
+        <p class="text-gray-500 text-sm">
+            Enter theory marks only. Unpaid students are marked as detained.
+        </p>
+    </div>
+
+    <!-- CLASS FILTER -->
+    <div class="flex gap-2 mb-6 flex-wrap">
+        {% for cls in classes %}
+        <a href="?class={{ cls }}"
+           class="px-4 py-1 rounded text-sm
+           {% if selected_class == cls %}
+               bg-indigo-600 text-white
+           {% else %}
+               bg-gray-200
+           {% endif %}">
+            Class {{ cls }}
+        </a>
+        {% endfor %}
+    </div>
+
+    <div class="bg-white rounded-xl shadow p-6 overflow-x-auto">
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <table class="w-full text-sm">
+
+                <thead class="bg-gray-100">
+                    <tr>
+                        <th class="p-2 text-left">Student</th>
+                        <th>Reg No</th>
+                        <th>Course</th>
+                        <th>TH Marks</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+<tbody>
+    {% for item in student_data %}
+    <tr class="border-t">
+
+        <td>{{ item.student.first_name }}</td>
+        <td>{{ item.student.username }}</td>
+
+        <td>
+            {% if item.course %}
+                {{ item.course.name }}
+            {% else %}
+                -
+            {% endif %}
+        </td>
+
+        <td>
+            {% if item.is_verified %}
+                <input type="number"
+                       name="th_{{ item.reg_id }}"
+                       value="{{ item.marks }}"
+                       class="border p-1 w-20 text-center">
+            {% else %}
+                <span class="text-gray-400">—</span>
+            {% endif %}
+        </td>
+
+        <td>
+            {% if item.is_verified %}
+                <span class="text-green-600 font-semibold">Eligible</span>
+            {% else %}
+                <span class="text-red-600 font-semibold">Detained</span>
+            {% endif %}
+        </td>
+
+    </tr>
+    {% endfor %}
+</tbody>
+
+            </table>
+
+            <div class="mt-6">
+                <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded">
+                    💾 Save Marks
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

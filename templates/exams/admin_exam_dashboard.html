@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="p-8">
+
+    <h2 class="text-2xl font-bold mb-6">📝 Exam Management</h2>
+
+    <div class="bg-white shadow rounded p-5">
+
+        <table class="w-full text-sm">
+
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="p-2 text-left">Student</th>
+                    <th>Reg No</th>
+                    <th>Course</th>
+                    <th>School</th>
+                    <th>Amount</th>
+                    <th>Receipt</th>
+                    <th>Status</th>
+                    <th>Exam Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for e in exams %}
+                <tr class="border-t hover:bg-gray-50">
+
+                    <!-- STUDENT -->
+                    <td class="p-2 font-semibold">
+                        {{ e.student.first_name }}
+                    </td>
+
+                    <td>{{ e.student.username }}</td>
+                    <td>{{ e.course.name }}</td>
+                    <td>{{ e.school.name }}</td>
+                    <td class="font-medium">Rs. {{ e.amount }}</td>
+
+                    <!-- 🔥 RECEIPT -->
+                    <td>
+                        {% if e.receipt %}
+                            <a href="{{ e.receipt.url }}" target="_blank"
+                               class="text-indigo-600 underline text-xs">
+                               View Receipt
+                            </a>
+                        {% else %}
+                            <span class="text-gray-400 text-xs">
+                                Not Uploaded
+                            </span>
+                        {% endif %}
+                    </td>
+
+                    <!-- 🔥 STATUS -->
+                    <td>
+                        {% if e.status == "approved" %}
+                            <span class="text-green-600 font-semibold text-xs">
+                                Approved
+                            </span>
+                        {% elif e.status == "rejected" %}
+                            <span class="text-red-600 font-semibold text-xs">
+                                Rejected
+                            </span>
+                        {% else %}
+                            <span class="text-yellow-600 font-semibold text-xs">
+                                Pending
+                            </span>
+                        {% endif %}
+                    </td>
+
+                    <!-- 🔥 EXAM DATE (LOCK AFTER SAVE) -->
+                    <td>
+
+                        {% if e.exam_date %}
+                            <span class="text-green-600 font-semibold text-xs">
+                                {{ e.exam_date }}
+                            </span>
+                        {% else %}
+                            <form method="POST" action="{% url 'set_exam_date' e.id %}">
+                                {% csrf_token %}
+                                <div class="flex items-center gap-1">
+                                    <input type="date"
+                                           name="exam_date"
+                                           class="border p-1 text-xs rounded"
+                                           required>
+                                    <button class="bg-indigo-600 text-white px-2 py-1 text-xs rounded">
+                                        Save
+                                    </button>
+                                </div>
+                            </form>
+                        {% endif %}
+
+                    </td>
+
+                    <!-- 🔥 ACTION -->
+                    <td>
+
+                        {% if e.status == "pending" %}
+
+                            {% if e.receipt %}
+                                <a href="{% url 'approve_payment' e.id %}"
+                                   class="bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded text-xs">
+                                   Approve
+                                </a>
+
+                                <a href="{% url 'reject_payment' e.id %}"
+                                   class="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-xs">
+                                   Reject
+                                </a>
+                            {% else %}
+                                <span class="text-gray-400 text-xs">
+                                    Waiting for Receipt
+                                </span>
+                            {% endif %}
+
+                        {% else %}
+                            <span class="text-gray-400 text-xs">
+                                Completed
+                            </span>
+                        {% endif %}
+
+                    </td>
+
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="9" class="text-center p-5 text-gray-500">
+                        No exam registrations found
+                    </td>
+                </tr>
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}

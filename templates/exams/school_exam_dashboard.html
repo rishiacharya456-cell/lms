@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="p-8">
+
+    <h2 class="text-2xl font-bold mb-6">📝 School Exam Panel</h2>
+
+    <!-- 🔥 CLASS FILTER -->
+    <div class="flex gap-2 mb-6">
+        {% for cls in classes %}
+        <a href="?class={{ cls }}"
+           class="px-4 py-1 rounded text-sm
+           {% if selected_class == cls %}
+               bg-indigo-600 text-white
+           {% else %}
+               bg-gray-200
+           {% endif %}">
+            Class {{ cls }}
+        </a>
+        {% endfor %}
+    </div>
+
+    <!-- 🔥 TABLE -->
+    <div class="bg-white shadow rounded p-5">
+
+        <table class="w-full text-sm">
+
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="p-2 text-left">Student</th>
+                    <th>Reg No</th>
+                    <th>Class</th>
+                    <th>Section</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for s in students %}
+                <tr class="border-t">
+
+                    <td class="p-2 font-semibold">
+                        {{ s.first_name }}
+                    </td>
+
+                    <td>{{ s.username }}</td>
+                    <td>{{ s.student_class }}</td>
+                    <td>{{ s.section }}</td>
+
+                    <!-- 🔥 STATUS -->
+                    <td>
+                        {% if s.id in reg_map %}
+                            <span class="text-green-600 font-semibold text-xs">
+                                Fee Paid & Verified
+                            </span>
+                        {% else %}
+                            <span class="text-red-500 text-xs">
+                                Not Paid
+                            </span>
+                        {% endif %}
+                    </td>
+
+                    <!-- 🔥 ACTION -->
+                    <td>
+                        {% if s.id in reg_map %}
+                            <a href="{% url 'student_hall_ticket' s.id %}"
+                               class="bg-indigo-600 text-white px-2 py-1 rounded text-xs">
+                               Generate
+                            </a>
+                        {% else %}
+                            <span class="text-gray-400 text-xs">
+                                Not Available
+                            </span>
+                        {% endif %}
+                    </td>
+
+                </tr>
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <!-- 🔥 PRINT ALL -->
+    {% if selected_class %}
+    <div class="mt-6">
+        <a href="{% url 'print_all_hall_tickets' selected_class %}"
+           class="bg-green-600 text-white px-4 py-2 rounded">
+           🖨 Generate All Hall Tickets
+        </a>
+    </div>
+    {% endif %}
+
+</div>
+
+{% endblock %}

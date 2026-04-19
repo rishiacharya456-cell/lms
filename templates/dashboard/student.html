@@ -54,9 +54,9 @@
             </li>
 
             <li>
-                <a href="#" class="block hover:bg-indigo-700 p-2 rounded">
-                   📝 Exams
-                </a>
+                <a href="{% url 'exam_registration' %}" class="block hover:bg-indigo-700 p-2 rounded">
+    📝 Exam
+</a>
             </li>
 
             <li>
@@ -72,10 +72,11 @@
             </li>
 
             <li>
-                <a href="#" class="block hover:bg-indigo-700 p-2 rounded">
-                   📊 Results
-                </a>
-            </li>
+    <a href="{% url 'student_results' %}" 
+       class="block hover:bg-indigo-600 p-2 rounded">
+       📊 Results
+    </a>
+</li>
 
         </ul>
 

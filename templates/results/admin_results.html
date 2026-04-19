@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="p-8 bg-gray-100 min-h-screen">
+
+    <!-- HEADER -->
+    <div class="mb-6">
+        <h2 class="text-2xl font-bold text-gray-800">
+            📊 Result Management
+        </h2>
+        <p class="text-gray-500 text-sm">
+            Manage results, monitor progress, and publish school-wise outcomes
+        </p>
+    </div>
+
+    <!-- TABLE -->
+    <div class="bg-white rounded-xl shadow p-6 overflow-x-auto">
+
+        <table class="w-full text-sm border-collapse">
+
+            <!-- HEADER -->
+            <thead class="bg-gray-100 text-gray-600">
+                <tr>
+                    <th class="p-3 text-left">School</th>
+                    <th class="p-3 text-center">Students</th>
+                    <th class="p-3 text-center">Results</th>
+                    <th class="p-3 text-center">Detained</th>
+                    <th class="p-3 text-center">Status</th>
+                    <th class="p-3 text-center">Manage</th>
+                    <th class="p-3 text-center">Publish</th>
+                </tr>
+            </thead>
+
+            <!-- BODY -->
+            <tbody>
+
+                {% for s in schools %}
+                <tr class="border-t hover:bg-gray-50 transition">
+
+                    <!-- SCHOOL -->
+                    <td class="p-3 font-semibold text-gray-800">
+                        {{ s.name }}
+                    </td>
+
+                    <!-- STUDENTS -->
+                    <td class="text-center">
+                        {% if s.total_students and s.total_students > 0 %}
+                            <span class="bg-gray-200 px-3 py-1 rounded text-xs font-medium">
+                                {{ s.total_students }}
+                            </span>
+                        {% else %}
+                            <span class="text-red-500 text-xs font-medium">
+                                No Students
+                            </span>
+                        {% endif %}
+                    </td>
+
+                    <!-- RESULTS -->
+                    <td class="text-center">
+                        {% if s.total_results and s.total_results > 0 %}
+                            <span class="bg-indigo-100 text-indigo-700 px-3 py-1 rounded text-xs font-medium">
+                                {{ s.total_results }}
+                            </span>
+                        {% else %}
+                            <span class="text-gray-400 text-xs">
+                                Not Generated
+                            </span>
+                        {% endif %}
+                    </td>
+
+                    <!-- DETAINED -->
+                    <td class="text-center">
+                        {% if s.detained_count and s.detained_count > 0 %}
+                            <span class="bg-red-100 text-red-600 px-3 py-1 rounded text-xs font-medium">
+                                {{ s.detained_count }}
+                            </span>
+                        {% else %}
+                            <span class="text-gray-400 text-xs">
+                                0
+                            </span>
+                        {% endif %}
+                    </td>
+
+                    <!-- STATUS -->
+                    <td class="text-center">
+                        {% if s.total_students == 0 %}
+                            <span class="bg-red-100 text-red-600 px-2 py-1 rounded text-xs">
+                                No Data
+                            </span>
+
+                        {% elif s.total_results == 0 %}
+                            <span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs">
+                                Pending
+                            </span>
+
+                        {% elif s.is_published %}
+                            <span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs">
+                                Published
+                            </span>
+
+                        {% else %}
+                            <span class="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs">
+                                Ready to Publish
+                            </span>
+                        {% endif %}
+                    </td>
+
+                    <!-- MANAGE -->
+                    <td class="text-center">
+                        <a href="{% url 'admin_school_results' s.id %}"
+                           class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded text-xs">
+                            Manage
+                        </a>
+                    </td>
+
+                    <!-- PUBLISH -->
+                    <td class="text-center">
+
+                        {% if s.is_published %}
+                            <!-- ✅ ALREADY PUBLISHED -->
+                            <button type="button"
+                                    class="bg-gray-400 text-white px-3 py-1 rounded text-xs cursor-not-allowed">
+                                ✅ Published
+                            </button>
+
+                        {% elif s.total_results and s.total_results > 0 %}
+                            <!-- 🚀 READY TO PUBLISH -->
+                            <form method="POST" action="{% url 'publish_results' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="school" value="{{ s.id }}">
+
+                                <button type="submit"
+                                        onclick="return confirm('Publish results for this school?')"
+                                        class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-xs">
+                                    🚀 Publish
+                                </button>
+                            </form>
+
+                        {% else %}
+                            <!-- ❌ DISABLED -->
+                            <button type="button"
+                                    class="bg-gray-300 text-gray-500 px-3 py-1 rounded text-xs cursor-not-allowed">
+                                🚀 Publish
+                            </button>
+                        {% endif %}
+
+                    </td>
+
+                </tr>
+
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center p-6 text-gray-500">
+                        No schools available
+                    </td>
+                </tr>
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}

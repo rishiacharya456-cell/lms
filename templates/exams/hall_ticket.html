@@ -1,0 +1,25 @@
+{% for reg in registrations %}
+
+<div class="border p-4 mb-6" style="page-break-after: always;">
+
+    <h2 style="text-align:center;">🎫 Hall Ticket</h2>
+
+    <p><b>Name:</b> {{ reg.student.first_name }}</p>
+    <p><b>Reg No:</b> {{ reg.student.username }}</p>
+    <p><b>Class:</b> {{ reg.student.student_class }}</p>
+
+    <p><b>Course:</b> {{ reg.course.name }}</p>
+    <p><b>Exam Date:</b> {{ reg.exam_date }}</p>
+
+    <br><br>
+
+    <div style="display:flex; justify-content:space-between;">
+        <span>Invigilator Signature</span>
+        <span>Principal Signature</span>
+    </div>
+
+</div>
+
+{% endfor %}
+
+<button onclick="window.print()">🖨 Print All</button>
