@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="max-w-7xl mx-auto h-[88vh] flex rounded-xl overflow-hidden shadow-lg bg-white">
+
+    <!-- ================= LEFT SIDEBAR ================= -->
+    <div class="w-1/3 border-r bg-white flex flex-col">
+
+        <div class="p-4 font-semibold border-b">
+            💬 Chats
+        </div>
+
+        <div class="flex-1 overflow-y-auto">
+
+            {% for convo in conversations %}
+            <a href="?convo={{ convo.id }}">
+                <div class="p-4 border-b hover:bg-gray-100 cursor-pointer
+                            {% if active_convo and convo.id == active_convo.id %}bg-gray-100{% endif %}">
+
+                    <!-- 🔥 SCHOOL NAME SAFE -->
+                    <p class="font-semibold text-sm text-gray-800">
+                        {% if convo.school %}
+                            {{ convo.school.name|default:"Unnamed School" }}
+                        {% else %}
+                            Unknown School
+                        {% endif %}
+                    </p>
+
+                    <!-- 🔥 LAST MESSAGE -->
+                    <p class="text-xs text-gray-500 truncate">
+                        {% if convo.messages.last %}
+                            {{ convo.messages.last.content|truncatechars:40 }}
+                        {% else %}
+                            Start chat...
+                        {% endif %}
+                    </p>
+
+                </div>
+            </a>
+            {% empty %}
+            <div class="p-4 text-gray-400 text-sm">
+                No conversations yet
+            </div>
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+
+    <!-- ================= RIGHT PANEL ================= -->
+    <div class="flex-1 flex flex-col">
+
+        {% if active_convo %}
+
+        <!-- 🔥 CHAT HEADER -->
+        <div class="p-4 border-b font-semibold bg-gray-50 flex items-center gap-3">
+
+            <div class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold">
+                {% if active_convo.school %}
+                    {{ active_convo.school.name|first }}
+                {% else %}
+                    ?
+                {% endif %}
+            </div>
+
+            <div>
+                <p class="font-semibold text-gray-800">
+                    {% if active_convo.school %}
+                        {{ active_convo.school.name }}
+                    {% else %}
+                        Unknown School
+                    {% endif %}
+                </p>
+                <p class="text-xs text-gray-400">Chat</p>
+            </div>
+
+        </div>
+
+        <!-- 🔥 MESSAGES -->
+        <div class="flex-1 p-6 overflow-y-auto bg-gray-100 space-y-3">
+
+            {% for msg in messages %}
+            <div class="{% if msg.sender == request.user %}text-right{% endif %}">
+
+                <span class="inline-block px-4 py-2 rounded-2xl shadow
+                    {% if msg.sender == request.user %}
+                        bg-blue-600 text-white
+                    {% else %}
+                        bg-gray-300 text-black
+                    {% endif %}">
+                    {{ msg.content }}
+                </span>
+
+            </div>
+            {% empty %}
+            <p class="text-gray-400 text-sm">No messages yet</p>
+            {% endfor %}
+
+        </div>
+
+        <!-- 🔥 SEND MESSAGE -->
+        <form method="POST" action="{% url 'send_message' %}" class="p-4 border-t flex gap-2 bg-white">
+            {% csrf_token %}
+
+            <input type="hidden" name="conversation_id" value="{{ active_convo.id }}">
+
+            <input type="text" name="content"
+                   class="flex-1 border px-3 py-2 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400"
+                   placeholder="Type message..." required>
+
+            <button class="bg-blue-600 text-white px-5 rounded-full hover:bg-blue-700">
+                ➤
+            </button>
+        </form>
+
+        {% else %}
+
+        <!-- 🔥 FIRST MESSAGE MODE -->
+        <div class="flex-1 flex flex-col items-center justify-center gap-4">
+
+            <form method="POST" action="{% url 'send_message' %}" class="w-96 space-y-4 bg-white p-6 rounded-xl shadow">
+                {% csrf_token %}
+
+                <h2 class="text-lg font-semibold text-center text-gray-700">
+                    Start New Chat
+                </h2>
+
+                <select name="school" required class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-400">
+                    <option value="">Select School</option>
+                    {% for school in schools %}
+                        <option value="{{ school.id }}">{{ school.name }}</option>
+                    {% endfor %}
+                </select>
+
+                <textarea name="content" required
+                          class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-400"
+                          placeholder="Start conversation..."></textarea>
+
+                <button class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
+                    Start Chat
+                </button>
+
+            </form>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}

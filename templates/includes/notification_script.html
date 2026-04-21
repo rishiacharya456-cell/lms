@@ -1,0 +1,135 @@
+<script>
+console.log("🔥 NOTIFICATION SCRIPT EXECUTED");
+</script>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-messaging-compat.js"></script>
+
+<script>
+window.addEventListener("load", function () {
+
+    console.log("🔥 Firebase script loaded");
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyCe2P2F6k9xvy2t71DtCGUxaoC3gxzeKHs",
+        authDomain: "unipick-97be6.firebaseapp.com",
+        projectId: "unipick-97be6",
+        storageBucket: "unipick-97be6.firebasestorage.app",
+        messagingSenderId: "885476484930",
+        appId: "1:885476484930:web:fc8c99efeec6e78a85cadb"
+    };
+
+    // ✅ Safe init
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+        console.log("✅ Firebase initialized");
+    }
+
+    const messaging = firebase.messaging();
+
+    // 🔥 FOREGROUND HANDLER (FINAL)
+    messaging.onMessage((payload) => {
+        console.log("🔥 RECEIVED (foreground):", payload);
+
+        const title = payload.data?.title || "New Message";
+        const body = payload.data?.body || "You have a new message";
+
+        navigator.serviceWorker.getRegistration().then(reg => {
+            if (reg) {
+                reg.showNotification(title, {
+                    body: body,
+                    icon: "/static/logo.png",
+                    badge: "/static/logo.png",
+                    vibrate: [200, 100, 200],
+                });
+            }
+        });
+
+        // update badge
+        if (typeof updateNotificationCount === "function") {
+            updateNotificationCount();
+        }
+    });
+
+    // 🔥 Request permission
+    Notification.requestPermission().then(permission => {
+
+        console.log("Permission:", permission);
+
+        if (permission !== "granted") {
+            console.warn("❌ Notification permission denied");
+            return;
+        }
+
+        // 🔥 Register SW
+        navigator.serviceWorker.register("/firebase-messaging-sw.js")
+        .then((registration) => {
+
+            console.log("✅ Service Worker registered");
+
+            // 🔥 Get token
+            messaging.getToken({
+                vapidKey: "BHansJBbib7AWu-rcCOM2ln8UV90dKqRYB7yRJAJQSx3rV9LcTMMc37B1BIa5cSibJNEUW5a6HjjFwhw_lT1I2I",
+                serviceWorkerRegistration: registration
+            })
+            .then((token) => {
+
+                if (!token) {
+                    console.warn("⚠ No token received");
+                    return;
+                }
+
+                console.log("🔥 TOKEN:", token);
+
+                // ✅ Save token
+                fetch("/communications/save-device/", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": getCSRFToken()
+                    },
+                    body: JSON.stringify({
+                        token: token,
+                        device_type: "web"
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    console.log("✅ Token saved:", data);
+                })
+                .catch(err => {
+                    console.error("❌ Save token error:", err);
+                });
+
+            })
+            .catch(err => {
+                console.error("❌ Token error:", err);
+            });
+
+        })
+        .catch(err => {
+            console.error("❌ Service Worker error:", err);
+        });
+
+    });
+
+});
+
+
+// 🔐 CSRF
+function getCSRFToken() {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+        const cookies = document.cookie.split(";");
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.startsWith("csrftoken=")) {
+                cookieValue = cookie.substring("csrftoken=".length);
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>

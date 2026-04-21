@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     'attendance',
     'apps.exams',
     'apps.results',
+    'apps.communications',
 ]
 # Middleware
 MIDDLEWARE = [
@@ -110,8 +111,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Custom User Model
 AUTH_USER_MODEL = 'accounts.User'
 
-# Login redirects
-LOGIN_REDIRECT_URL = '/dashboard/'
+
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/super-admin/'
 LOGOUT_REDIRECT_URL = '/login/'
 
 

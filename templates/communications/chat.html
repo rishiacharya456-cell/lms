@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="max-w-7xl mx-auto h-[88vh] flex rounded-xl overflow-hidden shadow-lg bg-white">
+
+    <!-- ================= LEFT SIDEBAR ================= -->
+    <div class="w-1/3 border-r bg-white flex flex-col">
+
+        <!-- Header -->
+        <div class="p-4 font-semibold border-b text-gray-800">
+            💬 Chats
+        </div>
+
+        <!-- Chat List -->
+        <div class="flex-1 overflow-y-auto">
+
+            {% for convo in conversations %}
+            <a href="?convo={{ convo.id }}">
+                <div class="p-4 border-b hover:bg-gray-100 cursor-pointer">
+
+                    <p class="font-semibold text-sm">
+                        {{ convo.school.name }}
+                    </p>
+
+                    <p class="text-xs text-gray-500 truncate">
+                        {{ convo.messages.last.content|default:"Start chat..." }}
+                    </p>
+
+                </div>
+            </a>
+            {% empty %}
+            <div class="p-4 text-gray-400 text-sm">
+                No chats yet
+            </div>
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+
+    <!-- ================= RIGHT PANEL ================= -->
+    <div class="flex-1 flex flex-col">
+
+        {% if active_convo %}
+
+        <!-- Header -->
+        <div class="p-4 border-b font-semibold bg-gray-50">
+            {{ active_convo.school.name }}
+        </div>
+
+        <!-- Messages -->
+        <div class="flex-1 p-6 overflow-y-auto bg-gray-100 space-y-3">
+
+            {% for msg in messages %}
+            <div class="{% if msg.sender == request.user %}text-right{% endif %}">
+
+                <span class="inline-block px-4 py-2 rounded-lg
+                    {% if msg.sender == request.user %}
+                        bg-blue-600 text-white
+                    {% else %}
+                        bg-gray-300 text-black
+                    {% endif %}">
+                    {{ msg.content }}
+                </span>
+
+            </div>
+            {% empty %}
+            <p class="text-gray-400 text-sm">No messages yet</p>
+            {% endfor %}
+
+        </div>
+
+        <!-- Send Message -->
+        <form method="POST" action="/communications/send/" class="p-4 border-t flex gap-2">
+            {% csrf_token %}
+
+            <input type="hidden" name="conversation_id" value="{{ active_convo.id }}">
+
+            <input type="text" name="content"
+                   class="flex-1 border px-3 py-2 rounded-full"
+                   placeholder="Type message..." required>
+
+            <button class="bg-blue-600 text-white px-5 rounded-full hover:bg-blue-700">
+                ➤
+            </button>
+        </form>
+
+        {% else %}
+
+        <!-- First Message Mode -->
+        <div class="flex-1 flex items-center justify-center">
+
+            <form method="POST" action="/communications/send/" class="w-96 space-y-4 bg-white p-6 rounded-xl shadow">
+                {% csrf_token %}
+
+                <h2 class="text-lg font-semibold text-center">
+                    Start New Chat
+                </h2>
+
+                <select name="school" required class="w-full border p-2 rounded">
+                    <option value="">Select School</option>
+                    {% for school in schools %}
+                        <option value="{{ school.id }}">{{ school.name }}</option>
+                    {% endfor %}
+                </select>
+
+                <textarea name="content" required
+                          class="w-full border p-2 rounded"
+                          placeholder="Type first message..."></textarea>
+
+                <button class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
+                    Start Chat
+                </button>
+
+            </form>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}
