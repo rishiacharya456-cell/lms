@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="p-8 bg-gray-50 min-h-screen">
+
+    <h2 class="text-3xl font-bold mb-6">📘 My Learning</h2>
+
+    {% for item in data %}
+    <div class="bg-white rounded-xl mb-6 shadow-md">
+
+        <!-- Phase Header -->
+        <div onclick="togglePhase('{{ item.phase.id }}')"
+             class="flex justify-between items-center p-5 cursor-pointer hover:bg-gray-100 rounded-t-xl">
+
+            <div class="flex items-center gap-3">
+                <span class="text-lg font-semibold text-gray-800">
+                    📂 {{ item.phase.title }}
+                </span>
+            </div>
+
+            <div class="flex items-center gap-4 text-sm">
+
+                <!-- Progress -->
+                <span class="text-gray-600 font-medium">
+                    {{ item.completed }}/{{ item.total }} Completed
+                </span>
+
+                <!-- Admin Unlock -->
+                {% if user.is_staff %}
+                <button onclick="event.stopPropagation(); unlockAll('{{ item.phase.id }}')"
+                    class="text-xs px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">
+                    Unlock All
+                </button>
+                {% endif %}
+
+            </div>
+        </div>
+
+        <!-- Topics -->
+        <div id="phase-{{ item.phase.id }}" class="hidden p-5 space-y-4">
+
+            {% for t in item.topics %}
+            <div class="bg-gray-50 rounded-lg p-4 shadow-sm">
+
+                <!-- Top Row -->
+                <div class="flex justify-between items-center">
+
+                    <div class="flex items-center gap-3">
+                        {% if t.unlocked %}
+                            <span class="text-green-600 text-lg">🔓</span>
+                        {% else %}
+                            <span class="text-gray-400 text-lg">🔒</span>
+                        {% endif %}
+
+                        <span class="font-medium text-gray-800 {% if not t.unlocked %}opacity-50{% endif %}">
+                            {{ t.topic.title }}
+                        </span>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex items-center gap-3">
+
+                        {% if t.unlocked %}
+                        <a href="{% url 'view_topic' t.topic.id %}"
+                           class="text-xs px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700">
+                           ▶ Start
+                        </a>
+
+                        <input type="checkbox"
+                               {% if t.completed %}checked{% endif %}
+                               onclick="markComplete('{{ t.topic.id }}')"
+                               class="w-4 h-4">
+                        {% else %}
+                        <span class="text-xs px-3 py-1 bg-gray-300 text-gray-600 rounded">
+                            Locked
+                        </span>
+                        {% endif %}
+
+                    </div>
+                </div>
+
+                <!-- Description -->
+                {% if t.topic.description %}
+                <p class="text-sm text-gray-600 mt-2 {% if not t.unlocked %}opacity-50{% endif %}">
+                    {{ t.topic.description }}
+                </p>
+                {% endif %}
+
+                <!-- File -->
+                {% if t.topic.file and t.unlocked %}
+                <a href="{{ t.topic.file.url }}" target="_blank"
+                   class="text-blue-600 text-sm block mt-2">
+                   📄 View Material
+                </a>
+                {% endif %}
+
+                <!-- Image -->
+                {% if t.topic.image and t.unlocked %}
+                <img src="{{ t.topic.image.url }}" 
+                     class="w-40 mt-3 rounded shadow">
+                {% endif %}
+
+            </div>
+            {% endfor %}
+
+        </div>
+
+    </div>
+    {% endfor %}
+
+</div>
+
+<!-- JS -->
+<script>
+
+function togglePhase(id) {
+    let el = document.getElementById("phase-" + id);
+    el.classList.toggle("hidden");
+}
+
+// Mark Complete
+function markComplete(topicId) {
+    fetch(`/syllabus/complete/${topicId}/`)
+        .then(res => res.json())
+        .then(() => {
+            // Optional: add visual feedback later
+        });
+}
+
+// Unlock (Admin/Trainer)
+function unlockAll(phaseId) {
+    fetch(`/syllabus/unlock-phase/${phaseId}/`)
+        .then(res => res.json())
+        .then(() => {
+            location.reload();
+        });
+}
+
+</script>
+
+{% endblock %}
