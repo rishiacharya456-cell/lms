@@ -30,11 +30,16 @@ urlpatterns = [
     path('courses/', include('apps.courses.urls')), 
     path('exams/', include('apps.exams.urls')),
     path('results/', include('apps.results.urls')),
+<<<<<<< HEAD
     path('communications/', include('apps.communications.urls')),
     path('logout/', LogoutView.as_view(next_page='/login/'), name='logout'),
 
     # 🔥 ADD THIS LINE (CRITICAL)
     path('firebase-messaging-sw.js', firebase_sw),
+=======
+    path('syllabus/', include('apps.syllabus.urls')),  # 🔥 THIS LINE MUST EXIST
+
+>>>>>>> 929983adc41dcb0b2201bcbee7902ba768c795c9
 ]
 
 

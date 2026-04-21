@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="p-8 bg-gray-50 min-h-screen">
+
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-8">
+        <h2 class="text-3xl font-bold text-gray-800">
+            ⚙ Syllabus Manager
+        </h2>
+    </div>
+
+    <!-- Add Class -->
+    <form method="POST" action="{% url 'add_syllabus' %}" 
+          class="flex gap-3 mb-10">
+        {% csrf_token %}
+        <input type="text" name="class_name"
+               placeholder="Enter Class (6, 7, 8...)"
+               class="border px-4 py-2 rounded-lg w-64 focus:ring-2 focus:ring-blue-400">
+
+        <button class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg shadow">
+            + Add Class
+        </button>
+    </form>
+
+    <!-- Classes -->
+    <div class="space-y-6">
+
+    {% for s in syllabus_list %}
+    <div class="bg-white rounded-xl shadow-md p-5">
+
+        <!-- Class Header -->
+        <div class="flex justify-between items-center cursor-pointer"
+             onclick="toggleClass('{{ s.id }}')">
+
+            <h3 class="text-xl font-semibold text-blue-700">
+                📘 Class {{ s.class_name }}
+            </h3>
+
+            <span id="arrow-{{ s.id }}" class="text-gray-500">
+                ▼
+            </span>
+        </div>
+
+        <!-- Expandable -->
+        <div id="class-{{ s.id }}" class="mt-4 hidden">
+
+            <!-- Add Phase -->
+            <form method="POST" action="{% url 'add_phase' %}" 
+                  class="flex gap-2 mb-4">
+                {% csrf_token %}
+                <input type="hidden" name="syllabus_id" value="{{ s.id }}">
+                <input type="text" name="title"
+                       placeholder="Add Phase"
+                       class="border px-3 py-2 rounded w-64">
+                <button class="bg-green-600 text-white px-4 rounded">
+                    + Add Phase
+                </button>
+            </form>
+
+            <!-- Phases -->
+            {% for phase in s.phases.all %}
+            <div class="bg-gray-50 rounded-lg p-4 mb-4">
+
+                <!-- Phase Header -->
+                <div class="flex justify-between items-center cursor-pointer"
+                     onclick="togglePhase('{{ phase.id }}')">
+
+                    <h4 class="font-semibold text-gray-800">
+                        📂 {{ phase.title }}
+                    </h4>
+
+                    <div class="flex gap-3 items-center">
+                        <a href="{% url 'delete_phase' phase.id %}" 
+                           onclick="return confirm('Delete this phase?')"
+                           class="text-red-500 text-sm">Delete</a>
+
+                        <span id="phase-arrow-{{ phase.id }}">▶</span>
+                    </div>
+                </div>
+
+                <!-- Topics -->
+                <div id="phase-{{ phase.id }}" class="mt-3 hidden">
+
+                    <!-- Add Topic -->
+                    <form method="POST" action="{% url 'add_topic' %}" 
+                          enctype="multipart/form-data"
+                          class="bg-white p-3 rounded shadow mb-4 space-y-2">
+
+                        {% csrf_token %}
+                        <input type="hidden" name="phase_id" value="{{ phase.id }}">
+
+                        <input type="text" name="title"
+                               placeholder="Topic Title"
+                               class="border px-2 py-1 rounded w-full">
+
+                        <textarea name="description"
+                                  placeholder="Topic Description"
+                                  class="border px-2 py-1 rounded w-full"></textarea>
+
+                        <div class="flex gap-3">
+                            <input type="file" name="file" class="border p-1">
+                            <input type="file" name="image" class="border p-1">
+                        </div>
+
+                        <button class="bg-purple-600 text-white px-3 py-1 rounded">
+                            + Add Topic
+                        </button>
+                    </form>
+
+                    <!-- Topic List -->
+                    <div class="space-y-2">
+                        {% for topic in phase.topics.all %}
+                        <div class="bg-white p-4 rounded shadow-sm border">
+
+                            <!-- Title -->
+                            <div class="flex justify-between items-center">
+                                <span class="font-semibold text-gray-800">
+                                    📄 {{ topic.title }}
+                                </span>
+
+                                <a href="{% url 'delete_topic' topic.id %}" 
+                                   onclick="return confirm('Delete this topic?')"
+                                   class="text-red-500 text-sm">
+                                   Delete
+                                </a>
+                            </div>
+
+                            <!-- ✅ FIXED DESCRIPTION -->
+                            {% if topic.description %}
+                            <div class="text-sm text-gray-700 mt-2 bg-gray-50 p-3 rounded leading-relaxed whitespace-pre-line">
+                                {{ topic.description }}
+                            </div>
+                            {% endif %}
+
+                            <!-- File -->
+                            {% if topic.file %}
+                            <a href="{{ topic.file.url }}" target="_blank"
+                               class="text-blue-600 text-sm block mt-2">
+                               📄 View File
+                            </a>
+                            {% endif %}
+
+                            <!-- Image -->
+                            {% if topic.image %}
+                            <img src="{{ topic.image.url }}" 
+                                 class="w-40 mt-3 rounded shadow border">
+                            {% endif %}
+
+                        </div>
+                        {% empty %}
+                        <p class="text-sm text-gray-400">No topics yet</p>
+                        {% endfor %}
+                    </div>
+
+                </div>
+
+            </div>
+            {% empty %}
+            <p class="text-sm text-gray-400">No phases yet</p>
+            {% endfor %}
+
+        </div>
+
+    </div>
+    {% endfor %}
+
+    </div>
+
+</div>
+
+<!-- JS -->
+<script>
+function toggleClass(id) {
+    let el = document.getElementById("class-" + id);
+    let arrow = document.getElementById("arrow-" + id);
+
+    el.classList.toggle("hidden");
+    arrow.innerText = el.classList.contains("hidden") ? "▼" : "▲";
+}
+
+function togglePhase(id) {
+    let el = document.getElementById("phase-" + id);
+    let arrow = document.getElementById("phase-arrow-" + id);
+
+    el.classList.toggle("hidden");
+    arrow.innerText = el.classList.contains("hidden") ? "▶" : "▼";
+}
+</script>
+
+{% endblock %}

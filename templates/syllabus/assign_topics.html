@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="p-8">
+
+<h2 class="text-2xl font-bold mb-6">🎯 Assign Syllabus to School</h2>
+
+<form method="POST">
+    {% csrf_token %}
+
+    <!-- Select School -->
+    <select name="school" class="border p-2 mb-4">
+        <option>Select School</option>
+        {% for school in schools %}
+            <option value="{{ school.id }}"
+                {% if selected_school and school.id == selected_school.id %}selected{% endif %}>
+                {{ school.name }}
+            </option>
+        {% endfor %}
+    </select>
+
+    <!-- Topics grouped -->
+    {% regroup topics by phase as phase_list %}
+
+    {% for group in phase_list %}
+    <div class="mb-4 bg-gray-100 p-3 rounded">
+
+        <h3 class="font-semibold text-blue-700">
+            📂 {{ group.grouper.title }}
+        </h3>
+
+        {% for topic in group.list %}
+        <label class="flex items-center gap-2 ml-4 py-1">
+            <input type="checkbox" name="topics" value="{{ topic.id }}"
+                {% if topic.id in unlocked_ids %}checked{% endif %}>
+            {{ topic.title }}
+        </label>
+        {% endfor %}
+
+    </div>
+    {% endfor %}
+
+    <button class="mt-4 bg-blue-600 text-white px-4 py-2 rounded">
+        Save Assignment
+    </button>
+
+</form>
+
+</div>
+
+{% endblock %}
