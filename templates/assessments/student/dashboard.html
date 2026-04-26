@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="p-8 bg-gray-100 min-h-screen">
+
+<h2 class="text-2xl font-bold mb-6">📝 Available Assessments</h2>
+
+<!-- STATS -->
+<div class="grid grid-cols-3 gap-4 mb-8">
+
+    <div class="bg-white p-4 rounded shadow text-center">
+        <p class="text-gray-500 text-sm">Total Assessments</p>
+        <p class="text-xl font-bold">{{ total_assessments }}</p>
+    </div>
+
+    <div class="bg-white p-4 rounded shadow text-center">
+        <p class="text-gray-500 text-sm">Submitted</p>
+        <p class="text-xl font-bold text-green-600">{{ submitted_count }}</p>
+    </div>
+
+
+    <div class="bg-white p-4 rounded shadow text-center">
+    <p class="text-gray-500 text-sm">Total Score</p>
+
+    <p class="text-xl font-bold text-indigo-600">
+        {{ total_obtained }} / {{ total_possible }}
+    </p>
+
+    {% if total_possible > 0 %}
+        <p class="text-xs text-gray-400 mt-1">
+            ({{ total_obtained|floatformat:0 }} / {{ total_possible|floatformat:0 }})
+        </p>
+    {% endif %}
+</div>
+
+</div>
+
+{% if assessments %}
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+{% for item in assessments %}
+{% with a=item.assessment %}
+
+<div class="bg-white p-5 rounded shadow">
+
+    <h3 class="font-semibold text-indigo-600 text-lg mb-1">
+        {{ a.title }}
+    </h3>
+
+    <p class="text-sm text-gray-500 mb-3">
+        {{ a.description|default:"No description provided" }}
+    </p>
+
+    <!-- STATUS -->
+    <div class="mb-2">
+        {% if item.submitted %}
+            <span class="text-green-600 font-semibold">✔ Submitted</span>
+        {% else %}
+            <span class="text-gray-500">Not Submitted</span>
+        {% endif %}
+    </div>
+
+    <!-- SCORE -->
+    {% if item.submitted %}
+        <p class="text-sm text-indigo-600 mb-3">
+            Score: {{ item.score }}
+        </p>
+    {% endif %}
+
+    <!-- TIME STATUS -->
+    <div class="mb-4">
+        {% if a.start_datetime and a.start_datetime > now %}
+            <span class="text-yellow-600">● Not Started</span>
+        {% elif a.end_datetime and a.end_datetime < now %}
+            <span class="text-red-600">● Expired</span>
+        {% else %}
+            <span class="text-green-600">● Active</span>
+        {% endif %}
+    </div>
+
+    <!-- ACTION -->
+    {% if item.submitted %}
+        <button disabled class="bg-green-600 text-white px-4 py-2 rounded w-full">
+            ✅ Completed
+        </button>
+
+    {% elif a.end_datetime and a.end_datetime < now %}
+        <button disabled class="bg-red-400 text-white px-4 py-2 rounded w-full">
+            ❌ Expired
+        </button>
+
+    {% else %}
+        <a href="{% url 'play_assessment' a.id %}"
+           class="block text-center bg-indigo-600 text-white px-4 py-2 rounded">
+           🎮 Start Assessment
+        </a>
+    {% endif %}
+
+</div>
+
+{% endwith %}
+{% endfor %}
+
+</div>
+
+{% else %}
+
+<div class="text-center mt-20">
+    <p class="text-gray-400 text-lg">📭 No assessments available</p>
+</div>
+
+{% endif %}
+
+</div>
+
+{% endblock %}

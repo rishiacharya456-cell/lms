@@ -30,11 +30,12 @@ INSTALLED_APPS = [
     'attendance',
     'apps.exams',
     'apps.results',
-<<<<<<< HEAD
+
     'apps.communications',
-=======
     'apps.syllabus',
->>>>>>> 929983adc41dcb0b2201bcbee7902ba768c795c9
+    'apps.missions',
+    'apps.assessments',
+
 ]
 # Middleware
 MIDDLEWARE = [

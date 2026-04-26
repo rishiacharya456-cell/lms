@@ -53,14 +53,42 @@
 </a>
             </li>
 
-            <li>
-                <a href="{% url 'exam_registration' %}" class="block hover:bg-indigo-700 p-2 rounded">
-    📝 Exam
-</a>
-            </li>
+           <li>
+    <a href="{% url 'exam_registration' %}" 
+       class="block hover:bg-indigo-700 p-2 rounded">
+        📝 Exam
+    </a>
 
 
-        
+</li>
+<li>
+    <a href="{% if syllabus %}{% url 'student_syllabus' syllabus.id %}{% else %}#{% endif %}"
+       class="block p-2 rounded
+       {% if syllabus %}
+           hover:bg-indigo-700 text-white
+       {% else %}
+           text-gray-400 cursor-not-allowed
+       {% endif %}">
+        📘 Syllabus
+    </a>
+</li>
+
+{% for m in missions %}
+<li>
+    <a href="{% url 'play_mission' m.id %}" target="_blank"
+       class="bg-purple-600 text-white px-3 py-1 rounded">
+       🎮 Play Mission
+    </a>
+</li>
+{% endfor %}
+
+
+<li>
+    <a href="{% url 'student_assessments' %}">
+        📝 Assessments
+    </a>
+</li>
+
 
         </ul>
 

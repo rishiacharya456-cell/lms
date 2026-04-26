@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="p-8 bg-gray-100 min-h-screen">
+
+<h2 class="text-2xl font-bold mb-6">📊 Student Performance</h2>
+
+<!-- 🔥 SUMMARY CARDS -->
+<div class="grid grid-cols-4 gap-4 mb-6">
+
+    <div class="bg-white p-4 rounded shadow">
+        <p class="text-gray-500 text-sm">Total Students</p>
+        <h2 class="text-xl font-bold">{{ students|length }}</h2>
+    </div>
+
+    <div class="bg-white p-4 rounded shadow">
+        <p class="text-gray-500 text-sm">Total Assessments</p>
+        <h2 class="text-xl font-bold">
+            {% if students %}{{ students.0.total_assessments }}{% else %}0{% endif %}
+        </h2>
+    </div>
+
+    <div class="bg-white p-4 rounded shadow">
+        <p class="text-gray-500 text-sm">Submitted</p>
+        <h2 class="text-xl font-bold">
+            {% with total=0 %}
+                {% for s in students %}
+                    {% if s.submitted > 0 %}{% widthratio total 1 1 %}{% endif %}
+                {% endfor %}
+            {% endwith %}
+            {{ students|length }}
+        </h2>
+    </div>
+
+    <div class="bg-white p-4 rounded shadow">
+        <p class="text-gray-500 text-sm">Selected Class</p>
+        <h2 class="text-xl font-bold">
+            {{ selected_class|default:"-" }}
+        </h2>
+    </div>
+
+</div>
+
+<!-- 🔥 FILTER -->
+<form method="GET" class="flex gap-3 mb-6">
+
+    <select name="class" class="p-2 border rounded bg-white">
+        <option value="">Select Class</option>
+        {% for c in classes %}
+            <option value="{{ c }}" {% if selected_class == c %}selected{% endif %}>
+                Class {{ c }}
+            </option>
+        {% endfor %}
+    </select>
+
+    <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded">
+        Load
+    </button>
+
+</form>
+
+<!-- 🔥 TABLE -->
+<div class="bg-white rounded shadow overflow-hidden">
+
+<table class="w-full">
+
+    <thead class="bg-gray-100 text-left text-sm uppercase tracking-wide text-gray-600">
+        <tr>
+            <th class="p-4">Student</th>
+            <th class="p-4">Attempts</th>
+            <th class="p-4">Score</th>
+            <th class="p-4">Status</th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+    {% for s in students %}
+    <tr class="border-t hover:bg-gray-50 transition">
+
+        <!-- Student -->
+        <td class="p-4 font-medium text-gray-800">
+            {{ s.student.username }}
+        </td>
+
+        <!-- Attempts -->
+        <td class="p-4">
+            {{ s.submitted }}/{{ s.total_assessments }}
+        </td>
+
+        <!-- Score -->
+        <td class="p-4 font-semibold
+            {% if "0/" in s.score %}text-red-500
+            {% else %}text-green-600
+            {% endif %}
+        ">
+            {{ s.score }}
+        </td>
+
+        <!-- Status -->
+        <td class="p-4">
+            {% if s.submitted > 0 %}
+                <span class="px-2 py-1 text-xs rounded bg-green-100 text-green-700">
+                    Completed
+                </span>
+            {% else %}
+                <span class="px-2 py-1 text-xs rounded bg-red-100 text-red-700">
+                    Pending
+                </span>
+            {% endif %}
+        </td>
+
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="4" class="p-6 text-center text-gray-400">
+            📭 No data available
+        </td>
+    </tr>
+    {% endfor %}
+
+    </tbody>
+
+</table>
+
+</div>
+
+</div>
+
+{% endblock %}

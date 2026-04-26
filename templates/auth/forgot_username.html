@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="min-h-screen flex items-center justify-center bg-gray-100">
+
+    <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
+
+        <h2 class="text-2xl font-bold text-center mb-2">Forgot Username</h2>
+        <p class="text-sm text-gray-500 text-center mb-6">
+            Enter your registered email to find your username
+        </p>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <!-- EMAIL -->
+            <div class="mb-4">
+                <label class="text-sm text-gray-600">Email</label>
+                <input type="email" name="email"
+                       class="w-full mt-1 p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                       placeholder="Enter your email"
+                       required>
+            </div>
+
+            <button type="submit"
+                    class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">
+                Find Username
+            </button>
+        </form>
+
+        <!-- SUCCESS RESULT -->
+        {% if username %}
+            <div class="mt-5 bg-green-100 text-green-700 p-3 rounded text-center">
+                Your username is:
+                <strong>{{ username }}</strong>
+            </div>
+        {% endif %}
+
+        <!-- MESSAGES -->
+        {% if messages %}
+            {% for message in messages %}
+                <p class="text-sm mt-3 text-center
+                    {% if message.tags == 'error' %}text-red-500
+                    {% elif message.tags == 'success' %}text-green-600
+                    {% else %}text-gray-600{% endif %}">
+                    {{ message }}
+                </p>
+            {% endfor %}
+        {% endif %}
+
+        <!-- 🔥 FIXED BACK LINK -->
+        <div class="mt-6 text-center">
+            <a href="/" class="text-blue-600 text-sm hover:underline">
+                ← Back to Home
+            </a>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

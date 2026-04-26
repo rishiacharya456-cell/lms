@@ -4,300 +4,286 @@
 <div class="flex">
 
 <!-- SIDEBAR -->
+
 <div class="w-64 bg-gray-900 text-gray-300 min-h-screen p-6">
 
-    <h2 class="text-xl font-semibold text-white mb-8">Nexolabs</h2>
+<h2 class="text-xl font-semibold text-white mb-8">Nexolabs</h2>
 
-    <ul class="space-y-2 text-sm">
+<ul class="space-y-2 text-sm">
 
-        <li>
-            <a href="#" class="block px-3 py-2 rounded-md bg-indigo-600 text-white">
-                Dashboard
-            </a>
-        </li>
+    <li>
+        <a href="#" class="block px-3 py-2 rounded-md bg-indigo-600 text-white">
+            Dashboard
+        </a>
+    </li>
 
-        <li><a href="#" class="block px-3 py-2 rounded-md hover:bg-gray-800">Schools</a></li>
-        <li><a href="/courses/" class="block px-3 py-2 rounded-md hover:bg-gray-800">Courses</a></li>
+    <li><a href="#" class="block px-3 py-2 rounded-md hover:bg-gray-800">Schools</a></li>
+    <li><a href="/courses/" class="block px-3 py-2 rounded-md hover:bg-gray-800">Courses</a></li>
 
-        <li>
-            <a href="{% url 'admin_exam_dashboard' %}" class="block px-3 py-2 rounded-md hover:bg-gray-800">
-                Exams
-            </a>
-        </li>
+    <li>
+        <a href="{% url 'admin_exam_dashboard' %}" class="block px-3 py-2 rounded-md hover:bg-gray-800">
+            Exams
+        </a>
+    </li>
 
-<<<<<<< HEAD
-        <li>
-            <a href="{% url 'admin_results' %}" class="block px-3 py-2 rounded-md hover:bg-gray-800">
-                Results
-            </a>
-        </li>
+    <li>
+        <a href="{% url 'admin_results' %}" class="block px-3 py-2 rounded-md hover:bg-gray-800">
+            Results
+        </a>
+    </li>
 
-        <li>
-            <a href="{% url 'student_list' %}" class="block px-3 py-2 rounded-md hover:bg-gray-800">
-                Students
-            </a>
-        </li>
+    <li>
+        <a href="{% url 'student_list' %}" class="block px-3 py-2 rounded-md hover:bg-gray-800">
+            Students
+        </a>
+    </li>
 
-        <li>
-            <a href="{% url 'attendance_management' %}" class="block px-3 py-2 rounded-md hover:bg-gray-800">
-                Attendance
-            </a>
-        </li>
+    <li>
+        <a href="{% url 'attendance_management' %}" class="block px-3 py-2 rounded-md hover:bg-gray-800">
+            Attendance
+        </a>
+    </li>
 
-    </ul>
+    <!-- ✅ FIXED: moved from header -->
+    <li>
+        <a href="{% url 'manage_syllabus' %}" class="block px-3 py-2 rounded-md hover:bg-gray-800">
+            Syllabus Manager
+        </a>
+    </li>
+
+    <li>
+        <a href="{% url 'create_mission' %}"
+   class="block p-2 hover:bg-indigo-700 rounded">
+   🎮 Create Mission
+</a>
+    </li>
+
+</ul>
 
 </div>
 
 <!-- MAIN -->
+
 <div class="flex-1 p-8">
 
-    <!-- HEADER -->
-    <div class="mb-8">
-        <h1 class="text-2xl font-semibold text-gray-800">
-            Welcome back, Admin
-        </h1>
-        <p class="text-gray-500 text-sm mt-1">
-            Here’s what’s happening today
-        </p>
-=======
-            <li>
-                <a href="{% url 'attendance_management' %}"
-   class="bg-indigo-600 text-white px-4 py-2 rounded">
-   📊 Attendance Management
-</a>
-            </li>
+<!-- HEADER -->
+<div class="mb-8">
+    <h1 class="text-2xl font-semibold text-gray-800">
+        Welcome back, Admin
+    </h1>
+    <p class="text-gray-500 text-sm mt-1">
+    </p>
+</div>
 
-            
-            <li>
-    <a href="{% url 'manage_syllabus' %}" 
-       class="block hover:bg-blue-700 p-2 rounded">
-       📘 Syllabus Manager
+<!-- ACTIONS -->
+<div class="flex gap-3 mb-8">
+
+    <a href="{% url 'add_school' %}" 
+       class="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm hover:bg-indigo-700">
+        Add School
     </a>
-</li>
 
-<li>
-    <a href="{% url 'assign_topics' %}" 
-       class="block hover:bg-blue-700 p-2 rounded">
-       🎯 Assign Syllabus
+    <a href="{% url 'student_list' %}" 
+       class="bg-gray-900 text-white px-4 py-2 rounded-md text-sm hover:bg-black">
+        View Students
     </a>
-</li>
 
+    <a href="{% url 'add_trainer' %}" 
+       class="border px-4 py-2 rounded-md text-sm hover:bg-gray-100">
+        Add Trainee
+    </a>
 
+</div>
 
-        </ul>
->>>>>>> 929983adc41dcb0b2201bcbee7902ba768c795c9
-    </div>
+<!-- STATS -->
+<div class="grid grid-cols-4 gap-6 mb-10">
 
-    <!-- ACTIONS -->
-    <div class="flex gap-3 mb-8">
-
-        <a href="{% url 'add_school' %}" 
-           class="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm hover:bg-indigo-700">
-            Add School
-        </a>
-
-        <a href="{% url 'student_list' %}" 
-           class="bg-gray-900 text-white px-4 py-2 rounded-md text-sm hover:bg-black">
-            View Students
-        </a>
-
-        <a href="{% url 'add_trainer' %}" 
-           class="border px-4 py-2 rounded-md text-sm hover:bg-gray-100">
-            Add Trainee
-        </a>
-
-    </div>
-
-    <!-- STATS -->
-    <div class="grid grid-cols-4 gap-6 mb-10">
-
-        <div class="bg-white border rounded-xl p-6">
-            <p class="text-sm text-gray-500">Total Schools</p>
-            <h2 class="text-2xl font-semibold mt-2">{{ total_schools }}</h2>
-        </div>
-
-        <div class="bg-white border rounded-xl p-6">
-            <p class="text-sm text-gray-500">Pending</p>
-            <h2 class="text-2xl font-semibold mt-2 text-amber-500">{{ pending_schools }}</h2>
-        </div>
-
-        <div class="bg-white border rounded-xl p-6">
-            <p class="text-sm text-gray-500">Approved</p>
-            <h2 class="text-2xl font-semibold mt-2 text-green-600">{{ approved_schools }}</h2>
-        </div>
-
-        <div class="bg-white border rounded-xl p-6">
-            <p class="text-sm text-gray-500">Revenue</p>
-            <h2 class="text-2xl font-semibold mt-2">Rs. {{ total_revenue|default:"0" }}</h2>
-        </div>
-
-    </div>
-
-    <!-- RECENT STUDENTS -->
-    <div class="bg-white border rounded-xl p-6 mb-10">
-
-        <div class="flex justify-between mb-4">
-            <h2 class="text-lg font-semibold text-gray-800">Recent Students</h2>
-            <a href="{% url 'student_list' %}" class="text-sm text-indigo-600 hover:underline">
-                View All
-            </a>
-        </div>
-
-        <table class="w-full text-sm">
-            <thead class="text-gray-500 border-b">
-                <tr>
-                    <th class="p-3 text-left">Photo</th>
-                    <th>Reg No</th>
-                    <th>Name</th>
-                    <th class="text-center">Class</th>
-                    <th class="text-center">Section</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                {% for student in recent_students %}
-                <tr class="border-b hover:bg-gray-50">
-
-                    <td class="p-3">
-                        {% if student.photo %}
-                            <img src="{{ student.photo.url }}" class="w-10 h-10 rounded-full">
-                        {% else %}
-                            <div class="w-10 h-10 bg-gray-200 rounded-full"></div>
-                        {% endif %}
-                    </td>
-
-                    <td class="text-indigo-600 font-medium">{{ student.username }}</td>
-                    <td>{{ student.first_name }}</td>
-                    <td class="text-center">{{ student.student_class }}</td>
-                    <td class="text-center">{{ student.section }}</td>
-
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="5" class="text-center p-6 text-gray-400">
-                        No students yet
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-
-    </div>
-
-    <!-- TRAINEES -->
-    <div class="bg-white border rounded-xl p-6 mb-10">
-
-        <div class="flex justify-between mb-4">
-            <h2 class="text-lg font-semibold text-gray-800">Trainees</h2>
-
-            <a href="{% url 'add_trainer' %}" 
-               class="text-sm bg-indigo-600 text-white px-3 py-1 rounded-md hover:bg-indigo-700">
-                Add
-            </a>
-        </div>
-
-        <table class="w-full text-sm">
-            <thead class="text-gray-500 border-b">
-                <tr>
-                    <th class="p-3 text-left">Photo</th>
-                    <th>Name</th>
-                    <th>Reg No</th>
-                    <th>Email</th>
-                    <th>Phone</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                {% for t in trainees %}
-                <tr class="border-b hover:bg-gray-50">
-
-                    <td class="p-2">
-                        {% if t.trainer_photo %}
-                            <img src="{{ t.trainer_photo.url }}" class="w-10 h-10 rounded-full">
-                        {% else %}
-                            <div class="w-10 h-10 bg-gray-200 rounded-full"></div>
-                        {% endif %}
-                    </td>
-
-                    <td>{{ t.username }}</td>
-                    <td class="text-indigo-600 font-medium">{{ t.trainer_reg_no }}</td>
-                    <td>{{ t.email }}</td>
-                    <td>{{ t.phone }}</td>
-
-                </tr>
-
-                {% empty %}
-                <tr>
-                    <td colspan="5" class="text-center p-6 text-gray-400">
-                        No trainees added
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-
-    </div>
-
-    <!-- SCHOOLS -->
     <div class="bg-white border rounded-xl p-6">
+        <p class="text-sm text-gray-500">Total Schools</p>
+        <h2 class="text-2xl font-semibold mt-2">{{ total_schools }}</h2>
+    </div>
 
-        <table class="w-full text-sm">
-            <thead class="text-gray-500 border-b">
-                <tr>
-                    <th class="p-3 text-left">Name</th>
-                    <th>Email</th>
-                    <th>Phone</th>
-                    <th>Status</th>
-                    <th>Trainer</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
+    <div class="bg-white border rounded-xl p-6">
+        <p class="text-sm text-gray-500">Pending</p>
+        <h2 class="text-2xl font-semibold mt-2 text-amber-500">{{ pending_schools }}</h2>
+    </div>
 
-            <tbody>
-                {% for school in schools %}
-                <tr class="border-b hover:bg-gray-50">
+    <div class="bg-white border rounded-xl p-6">
+        <p class="text-sm text-gray-500">Approved</p>
+        <h2 class="text-2xl font-semibold mt-2 text-green-600">{{ approved_schools }}</h2>
+    </div>
 
-                    <td class="p-3 text-indigo-600 cursor-pointer font-medium"
-                        onclick="window.location.href='{% url 'school_detail' school.id %}'">
-                        {{ school.name }}
-                    </td>
-
-                    <td>{{ school.email }}</td>
-                    <td>{{ school.phone }}</td>
-
-                    <td>
-                        {% if school.status == 'approved' %}
-                            <span class="text-green-600 text-xs font-medium">Approved</span>
-                        {% else %}
-                            <span class="text-amber-500 text-xs font-medium">Pending</span>
-                        {% endif %}
-                    </td>
-
-                    <td>
-                        {% for t in school.assigned_trainers.all %}
-                            <span class="text-xs text-gray-700">{{ t.trainer_reg_no }}</span>
-                        {% empty %}
-                            <span class="text-gray-400 text-xs">Not assigned</span>
-                        {% endfor %}
-                    </td>
-
-                    <td>
-                        <a href="{% url 'edit_school' school.id %}" 
-                           onclick="event.stopPropagation();"
-                           class="text-indigo-600 text-xs hover:underline">
-                            Edit
-                        </a>
-                    </td>
-
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-
+    <div class="bg-white border rounded-xl p-6">
+        <p class="text-sm text-gray-500">Revenue</p>
+        <h2 class="text-2xl font-semibold mt-2">Rs. {{ total_revenue|default:"0" }}</h2>
     </div>
 
 </div>
 
+<!-- RECENT STUDENTS -->
+<div class="bg-white border rounded-xl p-6 mb-10">
+
+    <div class="flex justify-between mb-4">
+        <h2 class="text-lg font-semibold text-gray-800">Recent Students</h2>
+        <a href="{% url 'student_list' %}" class="text-sm text-indigo-600 hover:underline">
+            View All
+        </a>
+    </div>
+
+    <table class="w-full text-sm">
+        <thead class="text-gray-500 border-b">
+            <tr>
+                <th class="p-3 text-left">Photo</th>
+                <th>Reg No</th>
+                <th>Name</th>
+                <th class="text-center">Class</th>
+                <th class="text-center">Section</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for student in recent_students %}
+            <tr class="border-b hover:bg-gray-50">
+
+                <td class="p-3">
+                    {% if student.photo %}
+                        <img src="{{ student.photo.url }}" class="w-10 h-10 rounded-full">
+                    {% else %}
+                        <div class="w-10 h-10 bg-gray-200 rounded-full"></div>
+                    {% endif %}
+                </td>
+
+                <td class="text-indigo-600 font-medium">{{ student.username }}</td>
+                <td>{{ student.first_name }}</td>
+                <td class="text-center">{{ student.student_class }}</td>
+                <td class="text-center">{{ student.section }}</td>
+
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="text-center p-6 text-gray-400">
+                    No students yet
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+
+<!-- TRAINEES -->
+<div class="bg-white border rounded-xl p-6 mb-10">
+
+    <div class="flex justify-between mb-4">
+        <h2 class="text-lg font-semibold text-gray-800">Trainees</h2>
+
+        <a href="{% url 'add_trainer' %}" 
+           class="text-sm bg-indigo-600 text-white px-3 py-1 rounded-md hover:bg-indigo-700">
+            Add
+        </a>
+    </div>
+
+    <table class="w-full text-sm">
+        <thead class="text-gray-500 border-b">
+            <tr>
+                <th class="p-3 text-left">Photo</th>
+                <th>Name</th>
+                <th>Reg No</th>
+                <th>Email</th>
+                <th>Phone</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for t in trainees %}
+            <tr class="border-b hover:bg-gray-50">
+
+                <td class="p-2">
+                    {% if t.trainer_photo %}
+                        <img src="{{ t.trainer_photo.url }}" class="w-10 h-10 rounded-full">
+                    {% else %}
+                        <div class="w-10 h-10 bg-gray-200 rounded-full"></div>
+                    {% endif %}
+                </td>
+
+                <td>{{ t.username }}</td>
+                <td class="text-indigo-600 font-medium">{{ t.trainer_reg_no }}</td>
+                <td>{{ t.email }}</td>
+                <td>{{ t.phone }}</td>
+
+            </tr>
+
+            {% empty %}
+            <tr>
+                <td colspan="5" class="text-center p-6 text-gray-400">
+                    No trainees added
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+
+<!-- SCHOOLS -->
+<div class="bg-white border rounded-xl p-6">
+
+    <table class="w-full text-sm">
+        <thead class="text-gray-500 border-b">
+            <tr>
+                <th class="p-3 text-left">Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Status</th>
+                <th>Trainer</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for school in schools %}
+            <tr class="border-b hover:bg-gray-50">
+
+                <td class="p-3 text-indigo-600 cursor-pointer font-medium"
+                    onclick="window.location.href='{% url 'school_detail' school.id %}'">
+                    {{ school.name }}
+                </td>
+
+                <td>{{ school.email }}</td>
+                <td>{{ school.phone }}</td>
+
+                <td>
+                    {% if school.status == 'approved' %}
+                        <span class="text-green-600 text-xs font-medium">Approved</span>
+                    {% else %}
+                        <span class="text-amber-500 text-xs font-medium">Pending</span>
+                    {% endif %}
+                </td>
+
+                <td>
+                    {% for t in school.assigned_trainers.all %}
+                        <span class="text-xs text-gray-700">{{ t.trainer_reg_no }}</span>
+                    {% empty %}
+                        <span class="text-gray-400 text-xs">Not assigned</span>
+                    {% endfor %}
+                </td>
+
+                <td>
+                    <a href="{% url 'edit_school' school.id %}" 
+                       onclick="event.stopPropagation();"
+                       class="text-indigo-600 text-xs hover:underline">
+                        Edit
+                    </a>
+                </td>
+
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+
+</div>
 
 </div>
 

@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="p-8 bg-gray-100 min-h-screen">
+<h2 class="text-2xl font-bold mb-6">🏫 Mission Progress Dashboard</h2>
+
+<!-- 🔽 CLASS FILTER -->
+<form method="GET" class="mb-6">
+    <select name="class" onchange="this.form.submit()"
+        class="p-2 border rounded">
+
+        <option value="">All Classes</option>
+
+        <option value="6" {% if selected_class == "6" %}selected{% endif %}>Class 6</option>
+        <option value="7" {% if selected_class == "7" %}selected{% endif %}>Class 7</option>
+        <option value="8" {% if selected_class == "8" %}selected{% endif %}>Class 8</option>
+        <option value="9" {% if selected_class == "9" %}selected{% endif %}>Class 9</option>
+        <option value="10" {% if selected_class == "10" %}selected{% endif %}>Class 10</option>
+
+    </select>
+</form>
+
+{% if data %}
+
+    {% for item in data %}
+    <div class="bg-white p-6 rounded shadow mb-6">
+
+        <!-- 🎯 MISSION TITLE -->
+        <h3 class="text-lg font-semibold text-indigo-600 mb-4">
+            🎮 {{ item.mission.title }}
+        </h3>
+
+        <!-- 📊 TABLE -->
+        <div class="overflow-x-auto">
+            <table class="w-full border text-sm">
+
+                <thead class="bg-gray-200">
+                    <tr>
+                        <th class="p-2 text-left">👤 Student</th>
+                        <th class="p-2 text-center">Attempts</th>
+                        <th class="p-2 text-center">Score</th>
+                        <th class="p-2 text-center">Status</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for s in item.students %}
+                    <tr class="border-t hover:bg-gray-50">
+
+                        <td class="p-2">
+                            {{ s.student.username }}
+                        </td>
+
+                        <td class="p-2 text-center">
+                            {{ s.attempts }}
+                        </td>
+
+                        <td class="p-2 text-center">
+                            {{ s.score }}
+                        </td>
+
+                        <td class="p-2 text-center">
+
+                            {% if s.completed %}
+                                <span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-semibold">
+                                    ✔ Completed
+                                </span>
+                            {% else %}
+                                <span class="bg-red-100 text-red-600 px-2 py-1 rounded text-xs">
+                                    ❌ Not Done
+                                </span>
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+                    {% endfor %}
+                </tbody>
+
+            </table>
+        </div>
+
+    </div>
+    {% endfor %}
+
+{% else %}
+
+    <div class="text-gray-400 text-center py-10">
+        🚫 No mission data available
+    </div>
+
+{% endif %}
+
+
+</div>
+
+{% endblock %}

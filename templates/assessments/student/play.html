@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="p-8 bg-gray-900 text-white min-h-screen">
+
+<div class="max-w-3xl mx-auto">
+
+    <!-- HEADER -->
+    <div class="flex justify-between mb-4">
+        <h2 class="text-xl font-bold text-indigo-400">
+            Question {{ q_number }} / {{ total }}
+        </h2>
+
+        <!-- ⏱ TIMER -->
+        <div class="text-red-400 font-bold">
+            ⏱ <span id="timer">{{ attempt.time_left }}</span>s
+        </div>
+    </div>
+
+    <!-- QUESTION -->
+    <div class="bg-gray-800 p-6 rounded mb-6">
+        <p class="text-lg mb-4">{{ question.text }}</p>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            {% if question.question_type == "mcq" %}
+                {% for opt in question.options.all %}
+                <label class="block mb-2">
+                    <input type="radio" name="option" value="{{ opt.id }}">
+                    {{ opt.text }}
+                </label>
+                {% endfor %}
+            {% endif %}
+
+            {% if question.question_type == "text" %}
+                <input type="text" name="text_answer"
+                       class="w-full p-2 bg-black text-green-400 border border-gray-700 rounded">
+            {% endif %}
+
+            <!-- NEXT BUTTON -->
+            <button type="submit"
+                class="mt-4 bg-indigo-600 px-5 py-2 rounded hover:bg-indigo-700">
+                Next →
+            </button>
+
+        </form>
+    </div>
+
+</div>
+
+</div>
+
+<!-- 🔥 TIMER SCRIPT -->
+<script>
+let timeLeft = parseInt("{{ attempt.time_left }}");
+const timerEl = document.getElementById("timer");
+
+const countdown = setInterval(() => {
+    timeLeft--;
+    timerEl.innerText = timeLeft;
+
+    if (timeLeft <= 0) {
+        clearInterval(countdown);
+        document.querySelector("form").submit(); // auto next
+    }
+}, 1000);
+</script>
+
+<!-- 🚫 TAB SWITCH DETECTION -->
+<script>
+let attemptId = "{{ attempt.id }}";
+
+document.addEventListener("visibilitychange", function () {
+    if (document.hidden) {
+        fetch(`/assessments/tab-switch/${attemptId}/`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.locked) {
+                alert("🚫 Exam locked due to tab switching!");
+                window.location.href = "/assessments/student/";
+            } else {
+                alert("⚠ Do not switch tabs!");
+            }
+        });
+    }
+});
+</script>
+
+{% endblock %}

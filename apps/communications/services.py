@@ -1,83 +1,95 @@
+# apps/communications/services.py
+
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.utils import timezone
+from django.db.models import Q
+import logging
+
+from firebase_admin import messaging
 
 from .models import Message, Notification, Device
 
+logger = logging.getLogger(__name__)
 User = get_user_model()
 
 
-# 🔥 GET TARGET USERS
-def get_target_users(target_type, school=None, section=None):
+# 🎯 TARGET USERS
+def get_target_users(target_type, school=None, section=None, class_name=None):
+
+    qs = User.objects.filter(is_active=True)
 
     if target_type == "all_students":
-        return User.objects.filter(role="student", is_active=True)
+        return qs.filter(role="student")
 
     elif target_type == "all_trainees":
-        return User.objects.filter(role="trainee", is_active=True)
+        return qs.filter(role="trainee")
 
     elif target_type == "all_schools":
-        return User.objects.filter(role="school_admin", is_active=True)
+        return qs.filter(role="school_admin")
 
     elif target_type == "school_students" and school:
-        return User.objects.filter(
-            role="student",
-            school=school,
-            is_active=True
-        )
+        return qs.filter(role="student", school=school)
 
-    elif target_type == "section_students" and school and section:
-        return User.objects.filter(
-            role="student",
-            school=school,
-            section=section,
-            is_active=True
-        )
+    elif target_type == "class_students" and school and class_name:
+        q = Q(role="student", school=school, student_class=class_name)
+        if section:
+            q &= Q(section=section)
+        return qs.filter(q)
 
     return User.objects.none()
-from firebase_admin import messaging
-from firebase_admin import messaging
-from firebase_admin import messaging
 
+
+# 🔔 PUSH (chunked)
 def send_push_to_users(users, title, body):
 
-    devices = Device.objects.filter(user__in=users, is_active=True)
+    # stream tokens instead of loading all at once
+    tokens_qs = Device.objects.filter(
+        user__in=users,
+        is_active=True
+    ).values_list("device_token", flat=True)
 
-    tokens = list(devices.values_list("device_token", flat=True))
+    tokens = list(tokens_qs)
 
     if not tokens:
-        print("⚠️ No device tokens found")
+        logger.warning("No device tokens found")
         return
 
-    message = messaging.MulticastMessage(
-        tokens=tokens,
-        notification=messaging.Notification(
-            title=title,
-            body=body[:120],
-        ),
-        data={
-            "title": title,
-            "body": body[:120],
-        }
-    )
+    CHUNK = 500  # FCM limit
 
-    response = messaging.send_each_for_multicast(message)
+    success_total = 0
+    fail_total = 0
 
-    print(f"✅ Success: {response.success_count}")
-    print(f"❌ Failed: {response.failure_count}")
+    for i in range(0, len(tokens), CHUNK):
+        batch = tokens[i:i+CHUNK]
 
-    # 🔥 REMOVE INVALID TOKENS
-    for idx, resp in enumerate(response.responses):
-        if not resp.success:
-            bad_token = tokens[idx]
-            print("❌ Removing bad token:", bad_token)
+        message = messaging.MulticastMessage(
+            tokens=batch,
+            notification=messaging.Notification(
+                title=title,
+                body=body[:120],
+            ),
+            data={
+                "title": title,
+                "body": body[:120],
+            }
+        )
 
-            Device.objects.filter(device_token=bad_token).delete()
+        response = messaging.send_each_for_multicast(message)
+
+        success_total += response.success_count
+        fail_total += response.failure_count
+
+        # remove bad tokens
+        for idx, resp in enumerate(response.responses):
+            if not resp.success:
+                bad = batch[idx]
+                Device.objects.filter(device_token=bad).delete()
+
+    logger.info(f"Push sent → success={success_total}, failed={fail_total}")
 
 
-
-
-
+# 🚀 MAIN SEND
 @transaction.atomic
 def send_message(
     sender,
@@ -86,10 +98,18 @@ def send_message(
     target_type,
     school=None,
     section=None,
+    class_name=None,
     priority="normal"
 ):
 
-    # 1️⃣ Save Message
+    # basic validation (don’t overdo it, just guard obvious cases)
+    if target_type == "school_students" and not school:
+        raise ValueError("school is required for school_students")
+
+    if target_type == "class_students" and (not school or not class_name):
+        raise ValueError("school + class_name required for class_students")
+
+    # 1️⃣ Save message
     message = Message.objects.create(
         sender=sender,
         title=title,
@@ -100,21 +120,24 @@ def send_message(
         priority=priority
     )
 
-    print(f"📩 Message created: {title}")
+    logger.info(f"Message created: {title}")
 
-    # 2️⃣ Get Target Users
-    users = get_target_users(target_type, school, section)
+    # 2️⃣ Fetch users
+    users = get_target_users(
+        target_type,
+        school=school,
+        section=section,
+        class_name=class_name
+    )
 
     if not users.exists():
-        print("⚠️ No users found for this target")
+        logger.warning("No users found for target")
         return message
 
-    print(f"👥 Target users count: {users.count()}")
-
-    # 3️⃣ Bulk Notification Creation
+    # 3️⃣ Bulk notifications (iterator to reduce memory)
     now = timezone.now()
 
-    notifications = [
+    notifications = (
         Notification(
             user=user,
             message=message,
@@ -123,62 +146,54 @@ def send_message(
             type="message",
             created_at=now
         )
-        for user in users
-    ]
+        for user in users.iterator(chunk_size=1000)
+    )
 
     Notification.objects.bulk_create(notifications, batch_size=1000)
 
-    print(f"📦 Notifications created: {len(notifications)}")
+    logger.info("Notifications created")
 
-    # 4️⃣ Push Notification (SAFE CALL)
+    # 4️⃣ Push
     try:
         send_push_to_users(users, title, content)
-        print("🔔 Push notification triggered")
     except Exception as e:
-        print("❌ Push error:", str(e))
+        logger.error(f"Push error: {str(e)}")
 
     return message
 
 
-# 🔵 MARK AS READ
+# 🔵 MARK READ
 def mark_notification_as_read(notification_id, user):
 
-    try:
-        notification = Notification.objects.get(
-            id=notification_id,
-            user=user
-        )
+    updated = Notification.objects.filter(
+        id=notification_id,
+        user=user,
+        is_read=False
+    ).update(is_read=True)
 
-        if not notification.is_read:
-            notification.is_read = True
-            notification.save()
-
-        return True
-
-    except Notification.DoesNotExist:
-        return False
+    return bool(updated)
 
 
-# 📩 GET ALL NOTIFICATIONS
+# 📩 LIST
 def get_user_notifications(user):
     return Notification.objects.filter(user=user).order_by("-created_at")
 
 
-# 🔴 UNREAD COUNT
+# 🔴 COUNT
 def get_unread_count(user):
     return Notification.objects.filter(user=user, is_read=False).count()
 
 
-# 📱 REGISTER DEVICE TOKEN
+# 📱 DEVICE REGISTER
 def register_device(user, token, device_type="web"):
 
     if not token:
         return
 
     Device.objects.update_or_create(
-        user=user,
-        device_token=token,
+        device_token=token,   # important: unique token
         defaults={
+            "user": user,
             "device_type": device_type,
             "is_active": True
         }

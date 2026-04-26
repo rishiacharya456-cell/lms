@@ -70,31 +70,44 @@
     </a>
 </li>
 
-            <!-- 🔥 EXISTING -->
-            <li>
-                <a href="{% url 'school_attendance' %}" 
-                   class="block hover:bg-blue-700 p-2 rounded">
-                   📊 Attendance
-                </a>
-            </li>
+<!-- 🔥 EXISTING -->
+<li>
+    <a href="{% url 'school_attendance' %}" 
+       class="block hover:bg-blue-700 p-2 rounded">
+       📊 Attendance
+    </a>
 
 
-<<<<<<< HEAD
-            <li>
-                <a href="{% url 'inbox' %}"
-   class="flex items-center gap-3 bg-white p-3 rounded shadow hover:bg-gray-100">
+</li>
 
-    <div class="bg-blue-500 text-white p-2 rounded-full">💬</div>
-
-    <div>
-        <p class="font-semibold">Messages</p>
-        <p class="text-sm text-gray-500">View announcements</p>
-    </div>
-
+<li>
+<a href="{% if syllabus %}{% url 'school_syllabus' syllabus.id %}{% else %}#{% endif %}"
+   class="block p-2 rounded
+   {% if syllabus %}
+       hover:bg-indigo-700 text-white
+   {% else %}
+       text-gray-400 cursor-not-allowed
+   {% endif %}">
+    📘 School Syllabus
 </a>
 </li>
-=======
->>>>>>> 929983adc41dcb0b2201bcbee7902ba768c795c9
+
+<li>
+    <a href="{% url 'school_missions' %}"
+       class="block p-2 rounded hover:bg-indigo-700 text-white">
+
+        📊 Mission Dashboard
+        <p class="text-sm text-gray-400">Student Tasks</p>
+
+    </a>
+</li>
+
+<li>
+    <a href="{% url 'school_assessments' %}">
+        📊 Assessments
+    </a>
+</li>
+
         </ul>
 
     </div>

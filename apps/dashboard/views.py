@@ -60,6 +60,8 @@ def super_admin_dashboard(request):
 
     return render(request, "dashboard/super_admin.html", context)
 
+from apps.syllabus.models import Syllabus
+from apps.syllabus.models import Syllabus
 
 # =========================================
 # 🔥 SCHOOL ADMIN DASHBOARD
@@ -71,11 +73,27 @@ def school_admin_dashboard(request):
 
     students_qs = User.objects.filter(role='student', school=school)
 
+    # 🔥 TRY MATCH BY CLASS (IF EXISTS)
+    school_class = str(getattr(school, 'assigned_class', '')).strip()
+
+    syllabus = None
+
+    if school_class:
+        syllabus = Syllabus.objects.filter(
+            class_name__icontains=school_class,
+            allow_for_trainee=True
+        ).first()
+
+    # 🔥 FALLBACK (IMPORTANT — NEVER RETURN NONE)
+    if not syllabus:
+        syllabus = Syllabus.objects.filter(
+            allow_for_trainee=True
+        ).first()
+
     context = {
         "school": school,
         "students_count": students_qs.count(),
 
-        # ⚠️ FIXED: trainers should come from assigned_school
         "trainers_count": User.objects.filter(
             role='trainer',
             assigned_school=school
@@ -83,22 +101,57 @@ def school_admin_dashboard(request):
 
         "courses_count": Course.objects.count(),
         "recent_students": students_qs.order_by('-id')[:5],
+
+        # 🔥 ALWAYS NOT NONE NOW
+        "syllabus": syllabus
     }
 
     return render(request, "dashboard/school_admin.html", context)
 
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from apps.syllabus.models import Syllabus
+from apps.missions.models import Mission
 
-# =========================================
-# 🔥 STUDENT DASHBOARD
-# =========================================
+
 @login_required
 def student_dashboard(request):
 
     user = request.user
+    school = getattr(user, "school", None)
+
+    syllabus = None
+    missions = []
+
+    if user.role == "student":
+
+        student_class = str(getattr(user, "student_class", "")).strip()
+
+        # 🔥 FLEXIBLE MATCH
+        syllabus = Syllabus.objects.filter(
+            class_name__icontains=student_class,
+            allow_for_trainee=True
+        ).first()
+
+        # 🔥 FETCH ONLY UNLOCKED MISSIONS FOR THIS SCHOOL
+        if school:
+            missions = Mission.objects.filter(
+                allow_for_trainee=True,
+                is_active=True,
+                missionunlock__school=school,
+                missionunlock__is_unlocked=True
+            ).distinct()
+
+        # 🔍 DEBUG
+        print("DEBUG → student_class:", student_class)
+        print("DEBUG → syllabus found:", syllabus)
+        print("DEBUG → missions count:", missions.count())
 
     context = {
         "student": user,
-        "school": user.school,
+        "school": school,
+        "syllabus": syllabus,
+        "missions": missions,   # 🔥 IMPORTANT
     }
 
     return render(request, "dashboard/student.html", context)
@@ -123,6 +176,14 @@ from apps.accounts.models import User
 from apps.schools.models import School
 from attendance.models import Attendance
 
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from django.db.models import Count
+from datetime import date
+from apps.accounts.models import User
+from apps.schools.models import School
+from attendance.models import Attendance
+from apps.syllabus.models import Syllabus
 
 @login_required
 def trainee_dashboard(request):
@@ -147,6 +208,9 @@ def trainee_dashboard(request):
     class_labels = []
     class_data = []
     class_stats = []
+
+    # ✅ NEW: SYLLABUS (IMPORTANT FIX)
+    syllabus = None
 
     if school:
 
@@ -225,6 +289,12 @@ def trainee_dashboard(request):
                 "today_done": today_done
             })
 
+        # ✅ NEW: AUTO GET SYLLABUS FROM FIRST CLASS
+        first_class = classes[0] if classes else None
+
+        if first_class:
+            syllabus = Syllabus.objects.filter(class_name=first_class).first()
+
     context = {
         "trainer": trainer,
         "school": school,
@@ -235,15 +305,15 @@ def trainee_dashboard(request):
         "total_taken": total_taken,
         "daily": daily,
 
-        # 🔥 NEW
         "class_labels": class_labels,
         "class_data": class_data,
         "class_stats": class_stats,
+
+        # ✅ IMPORTANT
+        "syllabus": syllabus,
     }
 
     return render(request, 'dashboard/trainee_dashboard.html', context)
-
-
 # =========================================
 # 🔥 ASSIGN TRAINER TO SCHOOL
 # =========================================
@@ -260,3 +330,10 @@ def assign_trainer_dashboard(request):
         trainee.save()
 
     return redirect('super_admin')
+
+
+
+from django.shortcuts import render
+
+def home(request):
+    return render(request, 'home.html')  # your ready template

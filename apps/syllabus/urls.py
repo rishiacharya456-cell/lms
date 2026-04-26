@@ -16,6 +16,10 @@ urlpatterns = [
     path('assign-topics/', views.assign_topics, name='assign_topics'),
     path('delete-phase/<int:phase_id>/', views.delete_phase, name='delete_phase'),
     path('delete-topic/<int:topic_id>/', views.delete_topic, name='delete_topic'),
+    path('trainee/syllabus/<int:syllabus_id>/', views.trainee_syllabus, name='trainee_syllabus'),
+    path('syllabus/toggle-phase/', views.toggle_phase, name='toggle_phase'),
+    path('toggle-topic/', views.toggle_topic, name='toggle_topic'),
+    path('school/syllabus/<int:syllabus_id>/', views.school_syllabus, name='school_syllabus'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="min-h-screen bg-gray-900 text-white p-8">
+
+<div class="max-w-4xl mx-auto">
+
+    <!-- 🧑‍🚀 PLAYER STATUS -->
+    <div class="mb-6">
+
+        <div class="flex justify-between text-sm text-gray-300 mb-1">
+            <span>Level {{ player.level }}</span>
+            <span>{{ player.xp }} XP / {{ next_level_xp }}</span>
+        </div>
+
+        <!-- 🔥 PROGRESS BAR -->
+        <div class="w-full bg-gray-700 rounded h-3">
+            <div class="bg-green-400 h-3 rounded transition-all duration-500"
+                 style="width: {{ progress_percent }}%">
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 🎉 LEVEL UP -->
+    {% if leveled_up %}
+    <div class="mb-4 p-4 bg-yellow-400 text-black rounded text-center font-bold animate-pulse">
+        🎉 LEVEL UP! You are now Level {{ player.level }}
+    </div>
+    {% endif %}
+
+    <!-- 🎮 HEADER -->
+    <h1 class="text-3xl font-bold text-indigo-400 mb-2">
+        🚀 {{ mission.title }}
+    </h1>
+
+    <p class="text-gray-300 mb-6">
+        {{ mission.story }}
+    </p>
+
+    <!-- 🏆 XP -->
+    <div class="mb-4 text-sm text-green-400">
+        Reward: +{{ mission.xp }} XP
+    </div>
+
+    <!-- 💬 MESSAGE -->
+    {% if message %}
+    <div class="mb-4 p-3 rounded 
+        {% if success %}
+            bg-green-600
+        {% else %}
+            bg-red-600
+        {% endif %}">
+        {{ message }}
+    </div>
+    {% endif %}
+
+    <!-- 🎯 GAME BOX -->
+    <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <!-- 🧠 MISSION TYPES -->
+
+            {% if mission.mission_type == "bug" or mission.mission_type == "normal" %}
+                
+                <label class="block mb-2 text-gray-400">
+                    💻 Write / Fix Code
+                </label>
+
+                <textarea name="answer" rows="8"
+                    class="w-full p-3 rounded bg-black text-green-400 font-mono border border-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+
+{{ mission.starter_code }} </textarea>
+            {% elif mission.mission_type == "fill" %}
+
+                <label class="block mb-2 text-gray-400">
+                    ✏️ Fill the missing value
+                </label>
+
+                <input type="text" name="answer"
+                    class="w-full p-3 rounded bg-black text-green-400 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+
+            {% elif mission.mission_type == "output" %}
+
+                <label class="block mb-2 text-gray-400">
+                    🔍 What is the output?
+                </label>
+
+                <pre class="bg-black p-3 rounded text-green-400 mb-3">
+
+{{ mission.starter_code }} </pre>
+
+                <input type="text" name="answer"
+                    class="w-full p-3 rounded bg-black text-green-400 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+
+            {% endif %}
+
+            <!-- 🚀 BUTTON -->
+            <button type="submit"
+                class="mt-4 bg-indigo-600 hover:bg-indigo-700 px-5 py-2 rounded font-semibold transition-all">
+                🚀 Submit
+            </button>
+
+        </form>
+
+    </div>
+
+    <!-- 📊 PROGRESS -->
+    <div class="mt-6 text-sm text-gray-400">
+        Attempts: {{ progress.attempts }}
+    </div>
+
+</div>
+
+</div>
+
+{% endblock %}

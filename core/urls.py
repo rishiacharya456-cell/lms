@@ -2,10 +2,8 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from django.conf import settings
 from django.contrib.auth.views import LogoutView
 
-# 🔥 NEW IMPORTS (IMPORTANT)
 from django.http import FileResponse, HttpResponseNotFound
 import os
 
@@ -23,26 +21,31 @@ def firebase_sw(request):
 urlpatterns = [
     path('admin/', admin.site.urls),
 
-    path('', include('apps.accounts.urls')),
-    path('', include('apps.dashboard.urls')),  # 🔥 DASHBOARD
+    # ✅ AUTH ROUTES (login, register etc.)
+    path('', include('apps.accounts.urls')),   # handles /login/
+
+    # ✅ MAIN HOMEPAGE (dashboard → /)
+    path('', include('apps.dashboard.urls')),  
+
+    # ✅ FEATURE MODULES
     path('schools/', include('apps.schools.urls')),
     path('attendance/', include('attendance.urls')),
     path('courses/', include('apps.courses.urls')), 
     path('exams/', include('apps.exams.urls')),
     path('results/', include('apps.results.urls')),
-<<<<<<< HEAD
     path('communications/', include('apps.communications.urls')),
+    path('syllabus/', include('apps.syllabus.urls')),
+    path('missions/', include('apps.missions.urls')),
+    path('assessments/', include('apps.assessments.urls')),
+
+    # ✅ LOGOUT
     path('logout/', LogoutView.as_view(next_page='/login/'), name='logout'),
 
-    # 🔥 ADD THIS LINE (CRITICAL)
+    # ✅ SERVICE WORKER
     path('firebase-messaging-sw.js', firebase_sw),
-=======
-    path('syllabus/', include('apps.syllabus.urls')),  # 🔥 THIS LINE MUST EXIST
-
->>>>>>> 929983adc41dcb0b2201bcbee7902ba768c795c9
 ]
 
 
-# 🔥 MEDIA
+# 🔥 MEDIA FILES
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

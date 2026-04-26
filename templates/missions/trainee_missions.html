@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="p-8 bg-gray-100 min-h-screen">
+
+<h2 class="text-2xl font-bold mb-2">🎮 Manage Missions</h2>
+
+<!-- 🏫 SCHOOL INFO -->
+
+<p class="text-sm text-gray-500 mb-6">
+    School: 
+    <span class="font-semibold text-indigo-600">
+        {{ request.user.assigned_school.name }}
+    </span>
+</p>
+
+{% if data %}
+
+<div class="space-y-4">
+
+    {% for item in data %}
+    <div class="bg-white p-5 rounded shadow flex justify-between items-center">
+
+        <!-- LEFT -->
+        <div>
+            <h3 class="font-semibold text-indigo-600">
+                {{ item.mission.title }}
+            </h3>
+
+            <p class="text-sm text-gray-500">
+                {{ item.mission.topic.title }}
+            </p>
+
+            <p class="text-xs text-gray-400 mt-1">
+                XP: {{ item.mission.xp }} | Type: {{ item.mission.mission_type }}
+            </p>
+        </div>
+
+        <!-- RIGHT -->
+        <div class="flex gap-3 items-center">
+
+            <!-- 🎮 PLAY -->
+            <a href="{% url 'play_mission' item.mission.id %}"
+               class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 text-sm">
+               🎮 Play
+            </a>
+
+            <!-- 🔥 TOGGLE BUTTON -->
+            <form method="POST" action="{% url 'toggle_mission_unlock' %}">
+                {% csrf_token %}
+                <input type="hidden" name="mission_id" value="{{ item.mission.id }}">
+
+                <button class="px-4 py-2 rounded text-sm font-semibold transition
+                    {% if item.unlocked %}
+                        bg-green-600 hover:bg-green-700 text-white
+                    {% else %}
+                        bg-gray-400 hover:bg-gray-500 text-white
+                    {% endif %}">
+
+                    {% if item.unlocked %}
+                        🔓 Unlocked
+                    {% else %}
+                        🔒 Locked
+                    {% endif %}
+
+                </button>
+            </form>
+
+        </div>
+
+    </div>
+    {% endfor %}
+
+</div>
+
+{% else %}
+
+
+<p class="text-gray-400">🚫 No missions available</p>
+
+
+{% endif %}
+
+</div>
+
+{% endblock %}

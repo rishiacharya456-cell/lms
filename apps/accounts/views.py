@@ -298,3 +298,54 @@ def trainer_appointment(request, id):
     return render(request, 'attendences/super_admin/appointment_letter.html', {
         'trainer': trainer
     })
+    
+    
+    
+    
+from django.contrib import messages
+from django.shortcuts import render
+# ==============================
+# 🔐 FORGOT USERNAME
+# ==============================
+def forgot_username(request):
+    username = None
+
+    if request.method == "POST":
+        email = request.POST.get("email")
+
+        try:
+            user = User.objects.get(email=email)
+            username = user.username
+        except User.DoesNotExist:
+            messages.error(request, "No account found with this email")
+
+    return render(request, "auth/forgot_username.html", {
+        "username": username
+    })
+
+
+# ==============================
+# 🔐 FORGOT PASSWORD
+# ==============================
+def forgot_password(request):
+    if request.method == "POST":
+        username = request.POST.get("username")
+        new_password = request.POST.get("new_password")
+
+        try:
+            user = User.objects.get(username=username)
+            user.set_password(new_password)
+            user.save()
+
+            messages.success(request, "Password reset successful. You can login now.")
+        except User.DoesNotExist:
+            messages.error(request, "Invalid username")
+
+    return render(request, "auth/forgot_password.html")
+
+
+
+from django.shortcuts import render
+
+def choose_role(request):
+    return render(request, 'accounts/choose_role.html')

@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="p-8 bg-gray-100 min-h-screen">
+
+<h2 class="text-2xl font-bold mb-6">📝 Create Assessment</h2>
+
+<form method="POST" class="bg-white p-6 rounded shadow mb-8 space-y-4">
+    {% csrf_token %}
+
+    <!-- TITLE -->
+    <div>
+        <label class="block font-semibold mb-1">Title</label>
+        <input type="text" name="title"
+            placeholder="e.g. Introduction to Technology"
+            class="w-full p-2 border rounded" required>
+    </div>
+
+    <!-- DESCRIPTION -->
+    <div>
+        <label class="block font-semibold mb-1">Description</label>
+        <textarea name="description"
+            placeholder="What is this assessment about?"
+            class="w-full p-2 border rounded"></textarea>
+    </div>
+
+    <!-- TYPE -->
+    <div>
+        <label class="block font-semibold mb-1">Assessment Type</label>
+        <select name="type" class="w-full p-2 border rounded">
+            <option value="quiz">Quiz (Auto grading)</option>
+            <option value="assignment">Assignment (Manual grading)</option>
+        </select>
+    </div>
+
+    <!-- CLASS (🔥 FIXED) -->
+    <div>
+        <label class="block font-semibold mb-1">Class</label>
+        <select name="class_name" class="w-full p-2 border rounded" required>
+            <option value="">Select Class</option>
+            {% for c in classes %}
+                <option value="{{ c.class_name }}">
+                    Class {{ c.class_name }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <!-- SECTION -->
+    <div>
+        <label class="block font-semibold mb-1">Section (optional)</label>
+        <input type="text" name="section"
+            placeholder="e.g. A, B"
+            class="w-full p-2 border rounded">
+    </div>
+
+    <!-- START TIME -->
+    <div>
+        <label class="block font-semibold mb-1">Start Date & Time</label>
+        <input type="datetime-local" name="start_datetime"
+            class="w-full p-2 border rounded" required>
+    </div>
+
+    <!-- END TIME -->
+    <div>
+        <label class="block font-semibold mb-1">End Date & Time</label>
+        <input type="datetime-local" name="end_datetime"
+            class="w-full p-2 border rounded" required>
+    </div>
+
+    <!-- TAB LIMIT -->
+    <div>
+        <label class="block font-semibold mb-1">
+            Tab Switch Limit (Anti-cheating)
+        </label>
+        <input type="number" name="tab_limit" value="3"
+            class="w-full p-2 border rounded">
+        <p class="text-xs text-gray-500">
+            If student switches tab more than this → exam will be locked
+        </p>
+    </div>
+
+    <!-- SUBMIT -->
+    <button class="bg-indigo-600 text-white px-5 py-2 rounded hover:bg-indigo-700">
+        Create Assessment
+    </button>
+
+</form>
+<!-- LIST -->
+<h3 class="text-xl font-semibold mb-4">📚 Your Assessments</h3>
+
+{% for a in assessments %}
+<div class="bg-white p-4 rounded shadow mb-3 flex justify-between items-center">
+
+    <!-- LEFT (CLICKABLE TITLE) -->
+    <div>
+        <a href="{% url 'add_questions' a.id %}"
+           class="font-bold text-indigo-600 hover:underline">
+           {{ a.title }}
+        </a>
+
+        <p class="text-sm text-gray-500">
+            {{ a.description }}
+        </p>
+
+        <!-- STATUS -->
+        <p class="text-xs mt-1">
+            {% if a.is_published %}
+                <span class="text-green-600">● Published</span>
+            {% else %}
+                <span class="text-yellow-600">● Draft (Add Questions)</span>
+            {% endif %}
+        </p>
+    </div>
+
+    <!-- RIGHT (ACTION BUTTON) -->
+    <div>
+        <a href="{% url 'add_questions' a.id %}"
+           class="bg-indigo-600 text-white px-4 py-2 rounded text-sm hover:bg-indigo-700">
+            ✏️ Add Questions
+        </a>
+    </div>
+
+</div>
+{% empty %}
+<p class="text-gray-400">No assessments created yet</p>
+{% endfor %}
+
+{% endblock %}

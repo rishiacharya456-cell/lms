@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="p-8 bg-gray-100 min-h-screen">
+
+<!-- 🔥 HEADER -->
+<h2 class="text-2xl font-bold mb-6">🎮 Mission Control Panel</h2>
+
+<!-- 🔹 CLASS FILTER -->
+<form method="GET" class="mb-6 flex gap-3 items-center">
+
+    <select name="class"
+        onchange="this.form.submit()"
+        class="p-2 border rounded">
+
+        <option value="">All Classes</option>
+
+        {% for c in classes %}
+        <option value="{{ c.class_name }}"
+            {% if selected_class == c.class_name %}selected{% endif %}>
+            {{ c.class_name }}
+        </option>
+        {% endfor %}
+
+    </select>
+
+</form>
+
+<!-- 🔹 MAIN GRID -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+    <!-- ================= CREATE MISSION ================= -->
+    <div class="bg-white p-6 rounded shadow-md">
+
+        <h3 class="text-lg font-semibold mb-4">➕ Create Mission</h3>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <!-- TOPIC -->
+            <label class="block mb-1 font-semibold">Topic</label>
+            <select name="topic" class="w-full p-2 border rounded mb-4">
+                {% for t in topics %}
+                <option value="{{ t.id }}">{{ t.title }}</option>
+                {% empty %}
+                <option disabled>No topics available</option>
+                {% endfor %}
+            </select>
+
+            <!-- TITLE -->
+            <label class="block mb-1 font-semibold">Mission Title</label>
+            <input type="text" name="title"
+                   class="w-full p-2 border rounded mb-4" required>
+
+            <!-- STORY -->
+            <label class="block mb-1 font-semibold">Story</label>
+            <textarea name="story"
+                      class="w-full p-2 border rounded mb-4"></textarea>
+
+            <!-- TYPE -->
+            <label class="block mb-1 font-semibold">Mission Type</label>
+            <select name="mission_type" class="w-full p-2 border rounded mb-4">
+                <option value="bug">Fix Bug</option>
+                <option value="fill">Fill Code</option>
+                <option value="output">Output</option>
+                <option value="normal">Normal</option>
+            </select>
+
+            <!-- STARTER -->
+            <label class="block mb-1 font-semibold">Starter Code</label>
+            <textarea name="starter_code"
+                      class="w-full p-2 border rounded mb-4 font-mono"></textarea>
+
+            <!-- ANSWER -->
+            <label class="block mb-1 font-semibold">Correct Answer</label>
+            <textarea name="correct_answer"
+                      class="w-full p-2 border rounded mb-4 font-mono" required></textarea>
+
+            <!-- XP -->
+            <label class="block mb-1 font-semibold">XP</label>
+            <input type="number" name="xp" value="10"
+                   class="w-full p-2 border rounded mb-4">
+
+            <!-- ALLOW -->
+            <div class="mb-4">
+                <label class="flex items-center gap-2">
+                    <input type="checkbox" name="allow">
+                    Allow for Trainee
+                </label>
+            </div>
+
+            <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded w-full">
+                ➕ Create Mission
+            </button>
+
+        </form>
+
+    </div>
+
+    <!-- ================= MISSION LIST ================= -->
+    <div class="bg-white p-6 rounded shadow-md">
+
+        <h3 class="text-lg font-semibold mb-4">📚 Created Missions</h3>
+
+        {% if missions %}
+
+            <div class="space-y-4 max-h-[600px] overflow-y-auto">
+
+                {% for m in missions %}
+                <div class="border p-4 rounded hover:shadow transition">
+
+                    <!-- TOP -->
+                    <div class="flex justify-between items-center">
+
+                        <div>
+                            <h4 class="font-semibold text-indigo-600">
+                                {{ m.title }}
+                            </h4>
+
+                            <p class="text-sm text-gray-500">
+                                {{ m.topic.title }}
+                            </p>
+                        </div>
+
+                        <!-- STATUS -->
+                        <span class="text-xs px-2 py-1 rounded
+                            {% if m.allow_for_trainee %}
+                                bg-green-500 text-white
+                            {% else %}
+                                bg-gray-400 text-white
+                            {% endif %}">
+                            {% if m.allow_for_trainee %}
+                                Visible
+                            {% else %}
+                                Hidden
+                            {% endif %}
+                        </span>
+
+                    </div>
+
+                    <!-- STORY -->
+                    <p class="text-sm text-gray-600 mt-2">
+                        {{ m.story|truncatechars:80 }}
+                    </p>
+
+                    <!-- META -->
+                    <div class="text-xs text-gray-400 mt-2 flex justify-between">
+                        <span>XP: {{ m.xp }}</span>
+                        <span>Type: {{ m.mission_type }}</span>
+                    </div>
+
+                </div>
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <div class="text-center py-10 text-gray-400">
+                🚫 No missions created yet
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+</div>
+
+{% endblock %}
