@@ -32,4 +32,8 @@ urlpatterns = [
     # 🔥 ACCOUNT HELP
     path('forgot-username/', views.forgot_username, name='forgot_username'),
     path('forgot-password/', views.forgot_password, name='forgot_password'),
+    path('trainees/<int:id>/', views.trainee_detail, name='trainee_detail'),
+    path('trainees/<int:id>/qr/', views.download_trainee_qr, name='download_trainee_qr'),
+    path('trainees/delete/<int:id>/', views.delete_trainer, name='delete_trainer'),
+    path('verify/trainee/<uuid:token>/', views.verify_trainee, name='verify_trainee')
 ]

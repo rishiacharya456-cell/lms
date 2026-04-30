@@ -37,6 +37,7 @@ urlpatterns = [
     path('syllabus/', include('apps.syllabus.urls')),
     path('missions/', include('apps.missions.urls')),
     path('assessments/', include('apps.assessments.urls')),
+    path('dashboard/', include('apps.dashboard.urls')), 
 
     # ✅ LOGOUT
     path('logout/', LogoutView.as_view(next_page='/login/'), name='logout'),

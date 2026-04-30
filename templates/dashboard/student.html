@@ -1,232 +1,814 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="flex">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
-    <!-- SIDEBAR -->
-    <div class="w-64 bg-indigo-900 text-white min-h-screen p-6">
+  :root {
+    --sidebar-w: 260px;
+    --bg: #f0f2f7;
+    --surface: #ffffff;
+    --border: #e4e8ef;
+    --indigo: #4f46e5;
+    --indigo-dark: #3730a3;
+    --indigo-light: #eef2ff;
+    --indigo-mid: #6366f1;
+    --amber: #f59e0b;
+    --green: #10b981;
+    --red: #ef4444;
+    --yellow: #eab308;
+    --text-primary: #0f172a;
+    --text-secondary: #64748b;
+    --text-muted: #94a3b8;
+    --sidebar-bg: #0f172a;
+    --sidebar-text: #94a3b8;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow: 0 4px 16px rgba(0,0,0,0.08);
+    --shadow-lg: 0 12px 40px rgba(0,0,0,0.12);
+    --radius: 14px;
+    --radius-sm: 8px;
+  }
 
-        <!-- PROFILE -->
-        <div class="text-center mb-8">
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
-            {% if student.photo %}
-                <img src="{{ student.photo.url }}" 
-                     class="w-20 h-20 mx-auto rounded-full mb-3 border-4 border-white">
-            {% else %}
-                <div class="w-20 h-20 mx-auto bg-white text-indigo-900 flex items-center justify-center rounded-full mb-3 text-xl font-bold">
-                    {{ student.first_name|slice:":1" }}
-                </div>
-            {% endif %}
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+    font-size: 15px;
+  }
 
-            <h2 class="text-lg font-bold">
-                {{ student.first_name }} {{ student.last_name }}
-            </h2>
+  /* ── LAYOUT ─────────────────────────────── */
+  .lms-wrap { display: flex; min-height: 100vh; }
 
-            <p class="text-xs text-indigo-200">
-                {{ school.name }}
-            </p>
+  /* ── SIDEBAR ────────────────────────────── */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--sidebar-bg);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0; left: 0;
+    height: 100vh;
+    z-index: 200;
+    transition: transform .3s cubic-bezier(.4,0,.2,1);
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
 
-        </div>
+  /* PROFILE SECTION IN SIDEBAR */
+  .sidebar-profile {
+    padding: 28px 20px 20px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255,255,255,.06);
+    background: linear-gradient(160deg, #1e1b4b 0%, #0f172a 100%);
+  }
 
-        <!-- MENU -->
-        <ul class="space-y-3 text-sm">
+  .profile-avatar-wrap {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 12px;
+  }
 
-            <li>
-                <a href="{% url 'student_dashboard' %}" 
-                   class="block bg-indigo-700 p-2 rounded">
-                   Dashboard
-                </a>
-            </li>
+  .profile-avatar-wrap img,
+  .profile-avatar-initials {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid rgba(99,102,241,.6);
+    box-shadow: 0 0 0 4px rgba(99,102,241,.15);
+  }
 
-            <!-- ✅ FIXED ATTENDANCE LINK -->
-            <li>
-                <a href="{% url 'student_attendance' %}" 
-                   class="block hover:bg-indigo-700 p-2 rounded">
-                   📊 Attendance
-                </a>
-            </li>
+  .profile-avatar-initials {
+    background: linear-gradient(135deg, var(--indigo), var(--indigo-mid));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px;
+    font-weight: 800;
+    color: #fff;
+  }
 
-            <li>
-                <a href="{% url 'student_courses' %}" 
-   class="block hover:bg-indigo-700 p-2 rounded">
-   📚 Course Registration
-</a>
-            </li>
+  .profile-online-dot {
+    position: absolute;
+    bottom: 3px; right: 3px;
+    width: 14px; height: 14px;
+    background: var(--green);
+    border-radius: 50%;
+    border: 2.5px solid var(--sidebar-bg);
+  }
 
-           <li>
-    <a href="{% url 'exam_registration' %}" 
-       class="block hover:bg-indigo-700 p-2 rounded">
-        📝 Exam
-    </a>
+  .profile-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.3;
+  }
 
+  .profile-school {
+    font-size: 11.5px;
+    color: rgba(148,163,184,.8);
+    margin-top: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 
-</li>
-<li>
-    <a href="{% if syllabus %}{% url 'student_syllabus' syllabus.id %}{% else %}#{% endif %}"
-       class="block p-2 rounded
-       {% if syllabus %}
-           hover:bg-indigo-700 text-white
-       {% else %}
-           text-gray-400 cursor-not-allowed
-       {% endif %}">
-        📘 Syllabus
-    </a>
-</li>
+  .profile-reg {
+    display: inline-block;
+    margin-top: 8px;
+    background: rgba(99,102,241,.2);
+    border: 1px solid rgba(99,102,241,.3);
+    color: #a5b4fc;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 500;
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
 
-{% for m in missions %}
-<li>
-    <a href="{% url 'play_mission' m.id %}" target="_blank"
-       class="bg-purple-600 text-white px-3 py-1 rounded">
-       🎮 Play Mission
-    </a>
-</li>
-{% endfor %}
+  .sidebar-section-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.25);
+    padding: 18px 20px 6px;
+  }
 
+  .sidebar-nav { padding: 6px 12px; flex: 1; }
 
-<li>
-    <a href="{% url 'student_assessments' %}">
-        📝 Assessments
-    </a>
-</li>
+  .sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--sidebar-text);
+    text-decoration: none;
+    transition: all .18s ease;
+    margin-bottom: 2px;
+  }
 
+  .sidebar-link .s-icon {
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 8px;
+    font-size: 15px;
+    background: rgba(255,255,255,.04);
+    flex-shrink: 0;
+    transition: all .18s;
+  }
 
-        </ul>
+  .sidebar-link:hover { color: #fff; background: rgba(255,255,255,.06); }
+  .sidebar-link:hover .s-icon { background: rgba(255,255,255,.1); }
+  .sidebar-link.active { color: #fff; background: rgba(79,70,229,.25); }
+  .sidebar-link.active .s-icon {
+    background: var(--indigo);
+    box-shadow: 0 3px 10px rgba(79,70,229,.5);
+  }
 
+  .sidebar-link.disabled {
+    color: rgba(148,163,184,.35);
+    pointer-events: none;
+    cursor: not-allowed;
+  }
+  .sidebar-link.disabled .s-icon { opacity: .35; }
+
+  .sidebar-link.mission {
+    background: rgba(139,92,246,.2);
+    border: 1px solid rgba(139,92,246,.3);
+    color: #c4b5fd;
+    margin-bottom: 4px;
+  }
+  .sidebar-link.mission:hover { background: rgba(139,92,246,.35); color: #fff; }
+  .sidebar-link.mission .s-icon { background: rgba(139,92,246,.3); }
+
+  .sidebar-footer {
+    padding: 16px 12px;
+    border-top: 1px solid rgba(255,255,255,.06);
+  }
+
+  .logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #fca5a5;
+    text-decoration: none;
+    background: rgba(239,68,68,.08);
+    border: 1px solid rgba(239,68,68,.15);
+    transition: all .18s;
+    width: 100%;
+  }
+  .logout-btn:hover { background: rgba(239,68,68,.18); color: #fff; }
+
+  /* ── MOBILE OVERLAY ─────────────────────── */
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.55);
+    z-index: 190;
+    backdrop-filter: blur(3px);
+  }
+
+  /* ── MAIN ───────────────────────────────── */
+  .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+
+  /* ── TOPBAR ─────────────────────────────── */
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 28px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+    gap: 16px;
+  }
+
+  .topbar-left { display: flex; align-items: center; gap: 14px; }
+
+  .menu-btn {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 7px;
+    border-radius: 8px;
+    color: var(--text-secondary);
+    font-size: 22px;
+    line-height: 1;
+    transition: background .15s;
+  }
+  .menu-btn:hover { background: var(--bg); }
+
+  .topbar-title { font-size: 16px; font-weight: 700; color: var(--text-primary); }
+
+  .topbar-right { display: flex; align-items: center; gap: 10px; }
+
+  .topbar-pill {
+    background: var(--indigo-light);
+    color: var(--indigo);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px 13px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+
+  .topbar-icon-btn {
+    width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--bg);
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    border: 1px solid var(--border);
+    transition: all .15s;
+    text-decoration: none;
+    color: var(--text-primary);
+  }
+  .topbar-icon-btn:hover { background: var(--indigo-light); border-color: var(--indigo); }
+
+  /* ── PAGE BODY ──────────────────────────── */
+  .page-body { padding: 28px; flex: 1; }
+
+  /* ── PAGE HEADER ────────────────────────── */
+  .page-header { margin-bottom: 24px; }
+  .page-header h1 {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--text-primary);
+    letter-spacing: -.4px;
+  }
+  .page-header p { font-size: 14px; color: var(--text-secondary); margin-top: 3px; }
+
+  /* ── STAT CARDS ─────────────────────────── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow .2s, transform .2s;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .stat-card:hover { box-shadow: var(--shadow); transform: translateY(-2px); }
+
+  .stat-icon {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+  .icon-indigo { background: var(--indigo-light); }
+  .icon-green  { background: #dcfce7; }
+  .icon-amber  { background: #fef3c7; }
+  .icon-purple { background: #f3e8ff; }
+
+  .stat-label { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .6px; }
+  .stat-value {
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -.5px;
+    margin-top: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text-primary);
+  }
+
+  /* ── CARD ───────────────────────────────── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .card-title { font-size: 15px; font-weight: 700; color: var(--text-primary); }
+
+  .card-body { padding: 22px; }
+
+  /* ── PROFILE GRID ───────────────────────── */
+  .profile-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+  }
+
+  .profile-row {
+    display: contents;
+  }
+
+  .profile-key, .profile-val {
+    padding: 13px 16px;
+    font-size: 14px;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .profile-key {
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: #fafbff;
+    white-space: nowrap;
+  }
+
+  .profile-val {
+    color: var(--text-primary);
+    font-weight: 500;
+  }
+
+  /* ── ATTENDANCE TABLE ───────────────────── */
+  .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+  .data-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+
+  .data-table thead tr { background: #f8fafc; }
+
+  .data-table th {
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: .7px;
+    white-space: nowrap;
+  }
+
+  .data-table td {
+    padding: 14px 16px;
+    vertical-align: middle;
+    border-top: 1px solid #f1f5f9;
+    color: var(--text-primary);
+    font-size: 14px;
+  }
+
+  .reg-no {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--indigo);
+    background: var(--indigo-light);
+    padding: 3px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+  }
+
+  .pct-pill {
+    display: inline-block;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .pct-green  { background: #dcfce7; color: #15803d; }
+  .pct-yellow { background: #fef9c3; color: #854d0e; }
+  .pct-red    { background: #fee2e2; color: #b91c1c; }
+
+  /* ── ATTENDANCE MOBILE CARD ─────────────── */
+  .attendance-mobile { display: none; }
+
+  .att-mobile-card {
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    background: var(--surface);
+  }
+
+  .att-mobile-header {
+    background: linear-gradient(135deg, var(--indigo), var(--indigo-mid));
+    padding: 20px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .att-avatar {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.2);
+    border: 2px solid rgba(255,255,255,.4);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+
+  .att-name { font-size: 16px; font-weight: 700; }
+  .att-sub  { font-size: 12px; opacity: .8; margin-top: 2px; }
+
+  .att-stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border-top: 1px solid var(--border);
+  }
+
+  .att-stat {
+    padding: 16px 12px;
+    text-align: center;
+    border-right: 1px solid var(--border);
+  }
+  .att-stat:last-child { border-right: none; }
+
+  .att-stat-label { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .5px; }
+  .att-stat-value { font-size: 22px; font-weight: 800; font-family: 'JetBrains Mono', monospace; margin-top: 4px; }
+
+  .att-pct-bar-wrap {
+    padding: 16px 20px 20px;
+    border-top: 1px solid var(--border);
+  }
+  .att-pct-bar-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+  }
+  .att-pct-bar-label span:last-child { font-size: 16px; font-weight: 800; }
+  .att-pct-bar-bg {
+    height: 10px;
+    background: #f1f5f9;
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .att-pct-bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width .6s ease;
+  }
+  .fill-green  { background: linear-gradient(90deg, #10b981, #34d399); }
+  .fill-yellow { background: linear-gradient(90deg, #eab308, #facc15); }
+  .fill-red    { background: linear-gradient(90deg, #ef4444, #f87171); }
+
+  /* ── RESPONSIVE ─────────────────────────── */
+  @media (max-width: 768px) {
+    :root { --sidebar-w: 260px; }
+
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.open { transform: translateX(0); box-shadow: var(--shadow-lg); }
+
+    .sidebar-overlay.visible { display: block; }
+
+    .main { margin-left: 0; }
+
+    .menu-btn { display: flex; }
+
+    .topbar { padding: 0 16px; }
+    .topbar-pill { display: none; }
+
+    .page-body { padding: 16px; }
+
+    .page-header h1 { font-size: 20px; }
+    .page-header p  { font-size: 14px; }
+
+    .stats-grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    /* Hide the 3rd card on very small mobile if needed — keep all for now */
+    .stat-card { padding: 16px; }
+    .stat-value { font-size: 20px; }
+    .stat-icon { width: 40px; height: 40px; font-size: 19px; }
+    .stat-label { font-size: 11px; }
+
+    /* Profile grid full width */
+    .profile-grid { grid-template-columns: 1fr; }
+    .profile-key { background: transparent; padding-bottom: 2px; border-bottom: none; color: var(--text-muted); font-size: 12px; }
+    .profile-val { padding-top: 0; padding-bottom: 12px; font-size: 15px; border-bottom: 1px solid #f1f5f9; }
+
+    /* Hide desktop attendance table, show mobile card */
+    .attendance-desktop { display: none; }
+    .attendance-mobile { display: block; }
+
+    .data-table th, .data-table td { font-size: 13px; padding: 11px 12px; }
+  }
+
+  @media (max-width: 420px) {
+    .stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .stat-value { font-size: 18px; }
+    .stat-card { gap: 10px; padding: 14px; }
+  }
+</style>
+
+<!-- SIDEBAR OVERLAY -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<div class="lms-wrap">
+
+  <!-- ── SIDEBAR ──────────────────────────── -->
+  <aside class="sidebar" id="sidebar">
+
+    <!-- PROFILE -->
+    <div class="sidebar-profile">
+      <div class="profile-avatar-wrap">
+        {% if student.photo %}
+          <img src="{{ student.photo.url }}" alt="{{ student.first_name }}">
+        {% else %}
+          <div class="profile-avatar-initials">{{ student.first_name|slice:":1" }}</div>
+        {% endif %}
+        <div class="profile-online-dot"></div>
+      </div>
+      <div class="profile-name">{{ student.first_name }} {{ student.last_name }}</div>
+      <div class="profile-school">{{ school.name }}</div>
+      <span class="profile-reg">{{ student.username }}</span>
     </div>
 
-    <!-- MAIN -->
-    <div class="flex-1 bg-gray-100">
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-label">Navigation</div>
 
-        <!-- TOP BAR -->
-        <div class="bg-indigo-800 text-white px-6 py-3 flex justify-between">
-            <h2 class="font-semibold">Nexolabs Student Portal</h2>
-            <a href="/logout/" class="text-sm">Logout</a>
-        </div>
+      <a href="{% url 'dashboard:student_dashboard' %}" class="sidebar-link active">
+        <span class="s-icon">🏠</span> Dashboard
+      </a>
+      <a href="{% url 'student_attendance' %}" class="sidebar-link">
+        <span class="s-icon">📊</span> Attendance
+      </a>
+      <a href="{% url 'student_courses' %}" class="sidebar-link">
+        <span class="s-icon">📚</span> Course Registration
+      </a>
+      <a href="{% url 'exam_registration' %}" class="sidebar-link">
+        <span class="s-icon">📝</span> Exam
+      </a>
 
-        <div class="p-6">
+      <a href="{% if syllabus %}{% url 'student_syllabus' syllabus.id %}{% else %}#{% endif %}"
+         class="sidebar-link {% if not syllabus %}disabled{% endif %}">
+        <span class="s-icon">📘</span> Syllabus
+      </a>
 
-            <!-- HEADER -->
-            <div class="mb-6">
-                <h1 class="text-2xl font-bold">Dashboard</h1>
-                <p class="text-gray-600">
-                    Welcome, {{ student.first_name }}
-                </p>
-            </div>
+      <a href="{% url 'student_assessments' %}" class="sidebar-link">
+        <span class="s-icon">🗒️</span> Assessments
+      </a>
 
-            <!-- INFO CARDS -->
-            <div class="grid grid-cols-3 gap-6 mb-6">
+      {% if missions %}
+      <div class="sidebar-section-label" style="margin-top:8px;">Missions</div>
+      {% for m in missions %}
+      <a href="{% url 'play_mission' m.id %}" target="_blank" class="sidebar-link mission">
+        <span class="s-icon">🎮</span> Play Mission
+      </a>
+      {% endfor %}
+      {% endif %}
+    </nav>
 
-                <div class="bg-white p-5 rounded-xl shadow">
-                    <h3 class="text-gray-500">Reg No</h3>
-                    <p class="text-xl font-bold">{{ student.username }}</p>
-                </div>
-
-                <div class="bg-white p-5 rounded-xl shadow">
-                    <h3 class="text-gray-500">Class</h3>
-                    <p class="text-xl font-bold">{{ student.student_class }}</p>
-                </div>
-
-                <div class="bg-white p-5 rounded-xl shadow">
-                    <h3 class="text-gray-500">Section</h3>
-                    <p class="text-xl font-bold">{{ student.section }}</p>
-                </div>
-
-            </div>
-
-            <!-- PROFILE -->
-            <div class="bg-white p-6 rounded-xl shadow mb-6">
-
-                <h2 class="font-bold mb-4 text-lg border-b pb-2">
-                    Student Profile
-                </h2>
-
-                <div class="grid grid-cols-2 gap-y-3 text-sm">
-
-                    <div><b>Name:</b></div>
-                    <div>{{ student.first_name }} {{ student.last_name }}</div>
-
-                    <div><b>Date of Birth:</b></div>
-                    <div>{{ student.dob }}</div>
-
-                    <div><b>Father Name:</b></div>
-                    <div>{{ student.father_name }}</div>
-
-                    <div><b>Mother Name:</b></div>
-                    <div>{{ student.mother_name }}</div>
-
-                    <div><b>Contact:</b></div>
-                    <div>{{ student.phone }}</div>
-
-                    <div><b>Address:</b></div>
-                    <div>{{ student.address }}</div>
-
-                </div>
-
-            </div>
-
-            <!-- 🔥 ATTENDANCE SECTION (UNCHANGED) -->
-            <div id="attendance" class="bg-white p-6 rounded-xl shadow">
-
-                <h2 class="font-bold mb-4 text-lg border-b pb-2">
-                    📊 Attendance Report
-                </h2>
-
-                <table class="w-full text-sm border">
-
-                    <thead class="bg-gray-100">
-                        <tr>
-                            <th class="p-3 text-left">Name</th>
-                            <th>Reg No</th>
-                            <th>Class</th>
-                            <th>Section</th>
-                            <th>Total Classes</th>
-                            <th>Attended</th>
-                            <th>Percentage</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-
-                        <tr class="border-t">
-
-                            <td class="p-3 font-semibold">
-                                {{ student.first_name }} {{ student.last_name }}
-                            </td>
-
-                            <td class="text-center">{{ student.username }}</td>
-                            <td class="text-center">{{ student.student_class }}</td>
-                            <td class="text-center">{{ student.section }}</td>
-
-                            <td class="text-center">{{ total_classes }}</td>
-
-                            <td class="text-center text-green-600 font-semibold">
-                                {{ attended }}
-                            </td>
-
-                            <td class="text-center font-bold
-                                {% if percentage >= 75 %}
-                                    text-green-600
-                                {% elif percentage >= 50 %}
-                                    text-yellow-500
-                                {% else %}
-                                    text-red-500
-                                {% endif %}
-                            ">
-                                {{ percentage }}%
-                            </td>
-
-                        </tr>
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-        </div>
-
+    <div class="sidebar-footer">
+      <a href="/logout/" class="logout-btn">
+        <span>🚪</span> Logout
+      </a>
     </div>
 
-</div>
+  </aside>
+
+  <!-- ── MAIN ─────────────────────────────── -->
+  <div class="main">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="menu-btn" onclick="toggleSidebar()" aria-label="Toggle menu">☰</button>
+        <span class="topbar-title">Student Portal</span>
+      </div>
+      <div class="topbar-right">
+        <span class="topbar-pill">✦ Nexolabs</span>
+        <a href="/logout/" class="topbar-icon-btn" title="Logout">🚪</a>
+      </div>
+    </header>
+
+    <!-- PAGE BODY -->
+    <div class="page-body">
+
+      <!-- HEADER -->
+      <div class="page-header">
+        <h1>Dashboard 👋</h1>
+        <p>Welcome back, {{ student.first_name }}! Here's your overview.</p>
+      </div>
+
+      <!-- STATS -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon icon-indigo">🪪</div>
+          <div>
+            <div class="stat-label">Reg No</div>
+            <div class="stat-value" style="font-size:16px;margin-top:6px;">{{ student.username }}</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon icon-green">🎓</div>
+          <div>
+            <div class="stat-label">Class</div>
+            <div class="stat-value">{{ student.student_class }}</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon icon-amber">🏷️</div>
+          <div>
+            <div class="stat-label">Section</div>
+            <div class="stat-value">{{ student.section }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STUDENT PROFILE CARD -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">👤 Student Profile</div>
+        </div>
+        <div class="profile-grid">
+          <div class="profile-key">Full Name</div>
+          <div class="profile-val">{{ student.first_name }} {{ student.last_name }}</div>
+
+          <div class="profile-key">Date of Birth</div>
+          <div class="profile-val">{{ student.dob }}</div>
+
+          <div class="profile-key">Father's Name</div>
+          <div class="profile-val">{{ student.father_name }}</div>
+
+          <div class="profile-key">Mother's Name</div>
+          <div class="profile-val">{{ student.mother_name }}</div>
+
+          <div class="profile-key">Contact</div>
+          <div class="profile-val">{{ student.phone }}</div>
+
+          <div class="profile-key">Address</div>
+          <div class="profile-val">{{ student.address }}</div>
+        </div>
+      </div>
+
+      <!-- ATTENDANCE SECTION -->
+      <div id="attendance" class="card">
+        <div class="card-header">
+          <div class="card-title">📊 Attendance Report</div>
+        </div>
+
+        <!-- DESKTOP TABLE -->
+        <div class="table-wrap attendance-desktop">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Reg No</th>
+                <th>Class</th>
+                <th>Section</th>
+                <th>Total Classes</th>
+                <th>Attended</th>
+                <th>Percentage</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="font-weight:600;">{{ student.first_name }} {{ student.last_name }}</td>
+                <td><span class="reg-no">{{ student.username }}</span></td>
+                <td>{{ student.student_class }}</td>
+                <td>{{ student.section }}</td>
+                <td style="font-weight:600;text-align:center;">{{ total_classes }}</td>
+                <td style="font-weight:700;color:var(--green);text-align:center;">{{ attended }}</td>
+                <td style="text-align:center;">
+                  <span class="pct-pill
+                    {% if percentage >= 75 %}pct-green
+                    {% elif percentage >= 50 %}pct-yellow
+                    {% else %}pct-red{% endif %}">
+                    {{ percentage }}%
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- MOBILE ATTENDANCE CARD -->
+        <div class="attendance-mobile">
+          <div class="att-mobile-card">
+            <div class="att-mobile-header">
+              <div class="att-avatar">{{ student.first_name|slice:":1" }}</div>
+              <div>
+                <div class="att-name">{{ student.first_name }} {{ student.last_name }}</div>
+                <div class="att-sub">Class {{ student.student_class }} · Section {{ student.section }}</div>
+              </div>
+            </div>
+
+            <div class="att-stats-row">
+              <div class="att-stat">
+                <div class="att-stat-label">Total</div>
+                <div class="att-stat-value" style="color:var(--text-primary);">{{ total_classes }}</div>
+              </div>
+              <div class="att-stat">
+                <div class="att-stat-label">Attended</div>
+                <div class="att-stat-value" style="color:var(--green);">{{ attended }}</div>
+              </div>
+              <div class="att-stat">
+                <div class="att-stat-label">Absent</div>
+                <div class="att-stat-value" style="color:var(--red);">{{ total_classes|add:"-"|add:attended|default:"—" }}</div>
+              </div>
+            </div>
+
+            <div class="att-pct-bar-wrap">
+              <div class="att-pct-bar-label">
+                <span>Attendance Percentage</span>
+                <span class="
+                  {% if percentage >= 75 %}
+                    " style="color:var(--green);">
+                  {% elif percentage >= 50 %}
+                    " style="color:var(--yellow);">
+                  {% else %}
+                    " style="color:var(--red);">
+                  {% endif %}
+                  {{ percentage }}%</span>
+              </div>
+              <div class="att-pct-bar-bg">
+                <div class="att-pct-bar-fill
+                  {% if percentage >= 75 %}fill-green
+                  {% elif percentage >= 50 %}fill-yellow
+                  {% else %}fill-red{% endif %}"
+                  style="width: {{ percentage }}%">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /attendance card -->
+
+    </div><!-- /page-body -->
+  </div><!-- /main -->
+
+</div><!-- /lms-wrap -->
+
+<script>
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('visible');
+  }
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('visible');
+  }
+</script>
 
 {% endblock %}

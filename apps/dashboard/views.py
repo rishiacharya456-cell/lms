@@ -61,7 +61,6 @@ def super_admin_dashboard(request):
     return render(request, "dashboard/super_admin.html", context)
 
 from apps.syllabus.models import Syllabus
-from apps.syllabus.models import Syllabus
 
 # =========================================
 # 🔥 SCHOOL ADMIN DASHBOARD
@@ -123,6 +122,9 @@ def student_dashboard(request):
     syllabus = None
     missions = []
 
+    total_classes = 0
+    attended = 0
+
     if user.role == "student":
 
         student_class = str(getattr(user, "student_class", "")).strip()
@@ -133,7 +135,7 @@ def student_dashboard(request):
             allow_for_trainee=True
         ).first()
 
-        # 🔥 FETCH ONLY UNLOCKED MISSIONS FOR THIS SCHOOL
+        # 🔥 MISSIONS
         if school:
             missions = Mission.objects.filter(
                 allow_for_trainee=True,
@@ -142,16 +144,28 @@ def student_dashboard(request):
                 missionunlock__is_unlocked=True
             ).distinct()
 
-        # 🔍 DEBUG
-        print("DEBUG → student_class:", student_class)
-        print("DEBUG → syllabus found:", syllabus)
-        print("DEBUG → missions count:", missions.count())
+        # ============================
+        # 🔥 ATTENDANCE LOGIC (NEW)
+        # ============================
+        total_classes = Attendance.objects.filter(student=user).count()
+
+        attended = Attendance.objects.filter(
+            student=user,
+            status='present'   # ⚠️ adjust based on your model
+        ).count()
+
+        print("DEBUG → total:", total_classes)
+        print("DEBUG → attended:", attended)
 
     context = {
         "student": user,
         "school": school,
         "syllabus": syllabus,
-        "missions": missions,   # 🔥 IMPORTANT
+        "missions": missions,
+
+        # ✅ ADD THESE
+        "total_classes": total_classes,
+        "attended": attended,
     }
 
     return render(request, "dashboard/student.html", context)

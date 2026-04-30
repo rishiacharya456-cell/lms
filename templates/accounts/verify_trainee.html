@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verified Staff - Nexolabs</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+.badge {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+}
+</style>
+</head>
+
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+
+<div class="max-w-5xl w-full bg-white shadow-xl rounded-2xl overflow-hidden">
+
+    <!-- HEADER -->
+    <div class="bg-gradient-to-r from-blue-900 to-blue-700 text-white p-6 flex justify-between items-center">
+        <div>
+            <h1 class="text-2xl font-bold">NEXOLABS ACADEMY</h1>
+            <p class="text-sm opacity-80">Empowering Education, Enriching Lives</p>
+        </div>
+
+        <div class="text-right">
+            <p class="text-green-400 font-bold text-lg">✔ VERIFIED</p>
+            <p class="text-xs">Authentic Staff</p>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="p-8 flex flex-col md:flex-row gap-8">
+
+        <!-- LEFT SIDE -->
+        <div class="flex flex-col items-center relative">
+
+            {% if trainee.trainer_photo %}
+                <img src="{{ trainee.trainer_photo.url }}" 
+                     class="w-40 h-40 rounded-xl object-cover shadow">
+            {% else %}
+                <div class="w-40 h-40 bg-gray-200 rounded-xl"></div>
+            {% endif %}
+
+            <!-- VERIFIED BADGE -->
+            <div class="badge bg-blue-700 text-white text-xs px-3 py-1 rounded-full shadow">
+                VERIFIED
+            </div>
+
+        </div>
+
+        <!-- RIGHT SIDE -->
+        <div class="flex-1">
+
+            <h2 class="text-2xl font-bold text-gray-800">
+                {{ trainee.username }}
+            </h2>
+
+            <p class="text-indigo-600 font-semibold mb-2">
+                {{ trainee.designation }}
+            </p>
+
+            <p class="mb-4 text-sm text-gray-500">
+                Reg No: {{ trainee.trainer_reg_no }}
+            </p>
+
+            <!-- DETAILS -->
+            <div class="space-y-3 text-sm">
+
+                <p><strong>Address:</strong> {{ trainee.address|default:"N/A" }}</p>
+
+                <p><strong>Contact No:</strong> {{ trainee.phone }}</p>
+
+                <p><strong>Email:</strong> {{ trainee.email }}</p>
+
+                <p><strong>Department:</strong> {{ trainee.department|default:"N/A" }}</p>
+
+                <p><strong>Joining Date:</strong> {{ trainee.joining_date|default:"N/A" }}</p>
+
+                <p>
+                    <strong>Status:</strong>
+                    {% if trainee.is_active_trainer %}
+                        <span class="text-green-600 font-semibold">Active</span>
+                    {% else %}
+                        <span class="text-red-600 font-semibold">Inactive</span>
+                    {% endif %}
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- BELONGS SECTION -->
+    <div class="bg-blue-900 text-white p-4 text-center text-sm font-medium">
+        This trainer/staff belongs to <span class="font-bold">NEXOLABS ACADEMY</span>
+    </div>
+
+    <!-- DECLARATION -->
+    <div class="p-6 text-sm text-gray-700">
+
+        <h3 class="font-semibold mb-2">DECLARATION</h3>
+
+        <p>
+            The admin verifies that the above-mentioned person is an authorized member 
+            of Nexolabs Academy. If this ID card is lost or found, please contact us immediately.
+        </p>
+
+        <div class="mt-4 text-right italic">
+            Nexolabs Admin
+        </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <div class="bg-gray-900 text-white p-4 text-center text-sm">
+
+        IF LOST OR FOUND, PLEASE CONTACT
+
+        <div class="mt-2">
+            📞 977-9864162895 |
+            📧 admin@nexolabs.com
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

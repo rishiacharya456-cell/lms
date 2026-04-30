@@ -1,186 +1,611 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="flex">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
-```
-<!-- SIDEBAR -->
-<div class="w-64 bg-indigo-700 text-white min-h-screen p-5">
-    <h2 class="text-xl font-bold mb-6">Trainee Panel</h2>
+  :root {
+    --sidebar-w: 260px;
+    --bg: #f0f2f7;
+    --surface: #ffffff;
+    --border: #e4e8ef;
+    --indigo: #4f46e5;
+    --indigo-dark: #3730a3;
+    --indigo-light: #eef2ff;
+    --indigo-mid: #6366f1;
+    --amber: #f59e0b;
+    --green: #10b981;
+    --red: #ef4444;
+    --yellow: #eab308;
+    --text-primary: #0f172a;
+    --text-secondary: #64748b;
+    --text-muted: #94a3b8;
+    --sidebar-bg: #0f172a;
+    --sidebar-text: #94a3b8;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow: 0 4px 16px rgba(0,0,0,0.08);
+    --shadow-lg: 0 12px 40px rgba(0,0,0,0.12);
+    --radius: 14px;
+  }
 
-    <ul class="space-y-3 text-sm">
-        <li class="bg-indigo-900 p-2 rounded">Dashboard</li>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
-        <li>
-            <a href="{% url 'take_attendance' %}" 
-               class="block hover:bg-indigo-600 p-2 rounded">
-               Attendance
-            </a>
-        </li>
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+    font-size: 15px;
+  }
 
-        <li>
-            <a href="{% url 'trainee_marks' %}" 
-               class="block hover:bg-indigo-600 p-2 rounded">
-               📝 Internal Marks
-            </a>
-        </li>
+  .lms-wrap { display: flex; min-height: 100vh; }
 
-        <li>
-            <a href="{% url 'trainee_results' %}" 
-               class="block hover:bg-indigo-600 p-2 rounded">
-               📊 Results
-            </a>
-        </li>
+  /* ── SIDEBAR ────────────────────────────── */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--sidebar-bg);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0; left: 0;
+    height: 100vh;
+    z-index: 200;
+    transition: transform .3s cubic-bezier(.4,0,.2,1);
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
 
-        {% if syllabus and syllabus.id %}
-        <li>
-            <a href="{% url 'trainee_syllabus' syllabus.id %}"
-               class="block hover:bg-indigo-600 p-2 rounded">
-                📘 View Syllabus
-            </a>
-        </li>
+  .sidebar-profile {
+    padding: 28px 20px 20px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255,255,255,.06);
+    background: linear-gradient(160deg, #1e1b4b 0%, #0f172a 100%);
+  }
+
+  .profile-avatar-wrap {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 12px;
+  }
+
+  .profile-avatar-wrap img,
+  .profile-avatar-initials {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid rgba(99,102,241,.6);
+    box-shadow: 0 0 0 4px rgba(99,102,241,.15);
+  }
+
+  .profile-avatar-initials {
+    background: linear-gradient(135deg, var(--indigo), var(--indigo-mid));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px; font-weight: 800; color: #fff;
+  }
+
+  .profile-online-dot {
+    position: absolute; bottom: 3px; right: 3px;
+    width: 14px; height: 14px;
+    background: var(--green);
+    border-radius: 50%;
+    border: 2.5px solid var(--sidebar-bg);
+  }
+
+  .profile-name { font-size: 15px; font-weight: 700; color: #fff; line-height: 1.3; }
+  .profile-role { font-size: 11.5px; color: rgba(148,163,184,.8); margin-top: 4px; }
+  .profile-reg {
+    display: inline-block; margin-top: 8px;
+    background: rgba(99,102,241,.2);
+    border: 1px solid rgba(99,102,241,.3);
+    color: #a5b4fc;
+    font-size: 11px; font-family: 'JetBrains Mono', monospace; font-weight: 500;
+    padding: 3px 10px; border-radius: 20px;
+  }
+
+  .sidebar-section-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 1.2px;
+    text-transform: uppercase; color: rgba(255,255,255,.25);
+    padding: 18px 20px 6px;
+  }
+
+  .sidebar-nav { padding: 6px 12px; flex: 1; }
+
+  .sidebar-link {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border-radius: 10px;
+    font-size: 13.5px; font-weight: 500;
+    color: var(--sidebar-text); text-decoration: none;
+    transition: all .18s ease; margin-bottom: 2px;
+  }
+
+  .sidebar-link .s-icon {
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 8px; font-size: 15px;
+    background: rgba(255,255,255,.04); flex-shrink: 0; transition: all .18s;
+  }
+
+  .sidebar-link:hover { color: #fff; background: rgba(255,255,255,.06); }
+  .sidebar-link:hover .s-icon { background: rgba(255,255,255,.1); }
+  .sidebar-link.active { color: #fff; background: rgba(79,70,229,.25); }
+  .sidebar-link.active .s-icon { background: var(--indigo); box-shadow: 0 3px 10px rgba(79,70,229,.5); }
+
+  .sidebar-link.disabled {
+    color: rgba(148,163,184,.35); pointer-events: none; cursor: not-allowed;
+  }
+  .sidebar-link.disabled .s-icon { opacity: .35; }
+
+  .sidebar-link.mission {
+    background: rgba(139,92,246,.2);
+    border: 1px solid rgba(139,92,246,.3);
+    color: #c4b5fd; margin-bottom: 4px;
+  }
+  .sidebar-link.mission:hover { background: rgba(139,92,246,.35); color: #fff; }
+  .sidebar-link.mission .s-icon { background: rgba(139,92,246,.3); }
+
+  .sidebar-footer { padding: 16px 12px; border-top: 1px solid rgba(255,255,255,.06); }
+
+  .logout-btn {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px; border-radius: 10px;
+    font-size: 13.5px; font-weight: 600;
+    color: #fca5a5; text-decoration: none;
+    background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.15);
+    transition: all .18s; width: 100%;
+  }
+  .logout-btn:hover { background: rgba(239,68,68,.18); color: #fff; }
+
+  /* ── OVERLAY ────────────────────────────── */
+  .sidebar-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,.55); z-index: 190; backdrop-filter: blur(3px);
+  }
+
+  /* ── MAIN ───────────────────────────────── */
+  .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+
+  /* ── TOPBAR ─────────────────────────────── */
+  .topbar {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 0 28px; height: 64px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100; gap: 16px;
+  }
+
+  .topbar-left { display: flex; align-items: center; gap: 14px; }
+
+  .menu-btn {
+    display: none; background: none; border: none; cursor: pointer;
+    padding: 7px; border-radius: 8px; color: var(--text-secondary);
+    font-size: 22px; line-height: 1; transition: background .15s;
+  }
+  .menu-btn:hover { background: var(--bg); }
+
+  .topbar-title { font-size: 16px; font-weight: 700; color: var(--text-primary); }
+  .topbar-right { display: flex; align-items: center; gap: 10px; }
+
+  .topbar-pill {
+    background: var(--indigo-light); color: var(--indigo);
+    font-size: 12px; font-weight: 600;
+    padding: 5px 13px; border-radius: 20px; white-space: nowrap;
+  }
+
+  .topbar-icon-btn {
+    width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--bg); border-radius: 10px; cursor: pointer;
+    font-size: 16px; border: 1px solid var(--border);
+    transition: all .15s; text-decoration: none; color: var(--text-primary);
+  }
+  .topbar-icon-btn:hover { background: var(--indigo-light); border-color: var(--indigo); }
+
+  /* ── PAGE BODY ──────────────────────────── */
+  .page-body { padding: 28px; flex: 1; }
+
+  .page-header { margin-bottom: 24px; }
+  .page-header h1 { font-size: 22px; font-weight: 800; color: var(--text-primary); letter-spacing: -.4px; }
+  .page-header p  { font-size: 14px; color: var(--text-secondary); margin-top: 3px; }
+
+  /* ── SUMMARY STAT CARDS ─────────────────── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .stat-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px 22px;
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow .2s, transform .2s;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .stat-card:hover { box-shadow: var(--shadow); transform: translateY(-2px); }
+
+  .stat-icon {
+    width: 50px; height: 50px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; flex-shrink: 0;
+  }
+  .icon-indigo { background: var(--indigo-light); }
+  .icon-green  { background: #dcfce7; }
+  .icon-red    { background: #fee2e2; }
+  .icon-amber  { background: #fef3c7; }
+  .icon-purple { background: #f3e8ff; }
+
+  .stat-label { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .6px; }
+  .stat-value { font-size: 22px; font-weight: 800; letter-spacing: -.5px; margin-top: 4px; font-family: 'JetBrains Mono', monospace; }
+
+  /* ── CARD ───────────────────────────────── */
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); box-shadow: var(--shadow-sm);
+    overflow: hidden; margin-bottom: 20px;
+  }
+
+  .card-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 22px; border-bottom: 1px solid var(--border);
+  }
+  .card-title { font-size: 15px; font-weight: 700; color: var(--text-primary); }
+
+  .card-body { padding: 22px; }
+
+  /* ── TWO-COL GRID ───────────────────────── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+
+  /* ── PROFILE INFO CARD ──────────────────── */
+  .trainer-profile-card {
+    display: flex; align-items: center; gap: 18px; padding: 22px;
+  }
+
+  .trainer-avatar img,
+  .trainer-avatar-placeholder {
+    width: 72px; height: 72px; border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--indigo-light);
+    flex-shrink: 0;
+  }
+  .trainer-avatar-placeholder {
+    background: linear-gradient(135deg, var(--indigo), var(--indigo-mid));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px; font-weight: 800; color: #fff;
+  }
+
+  .trainer-info-name { font-size: 17px; font-weight: 800; color: var(--text-primary); }
+  .trainer-info-reg  {
+    font-family: 'JetBrains Mono', monospace; font-size: 12.5px; font-weight: 500;
+    color: var(--indigo); background: var(--indigo-light);
+    padding: 3px 10px; border-radius: 6px; display: inline-block; margin: 6px 0;
+  }
+  .trainer-info-email { font-size: 13.5px; color: var(--text-secondary); }
+
+  /* ── SCHOOL CARD ────────────────────────── */
+  .school-card-body { padding: 22px; }
+  .school-name { font-size: 17px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; }
+  .school-status {
+    display: inline-block; font-size: 12px; font-weight: 600;
+    padding: 4px 12px; border-radius: 20px;
+  }
+  .status-approved { background: #dcfce7; color: #15803d; }
+  .status-pending  { background: #fef3c7; color: #b45309; }
+  .no-school { color: var(--text-muted); font-size: 14px; }
+
+  /* ── SYLLABUS CARD ──────────────────────── */
+  .syllabus-body { padding: 22px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 10px 20px; border-radius: 10px;
+    font-size: 14px; font-weight: 600; text-decoration: none;
+    transition: all .18s; border: none; cursor: pointer;
+    white-space: nowrap;
+  }
+  .btn-primary { background: var(--indigo); color: #fff; box-shadow: 0 3px 10px rgba(79,70,229,.3); }
+  .btn-primary:hover { background: var(--indigo-dark); transform: translateY(-1px); box-shadow: 0 5px 18px rgba(79,70,229,.4); }
+
+  .syllabus-note { font-size: 13.5px; font-weight: 500; }
+  .note-green { color: var(--green); }
+  .note-gray  { color: var(--text-secondary); }
+  .note-red   { color: var(--red); }
+
+  /* ── CLASS STATS ────────────────────────── */
+  .class-stat-item {
+    padding: 18px 22px;
+    border-top: 1px solid var(--border);
+  }
+  .class-stat-item:first-child { border-top: none; }
+
+  .class-stat-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .class-stat-name { font-size: 15px; font-weight: 700; color: var(--text-primary); }
+
+  .done-badge, .pending-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 12px; font-weight: 700;
+    padding: 4px 12px; border-radius: 20px;
+  }
+  .done-badge    { background: #dcfce7; color: #15803d; }
+  .pending-badge { background: #fee2e2; color: #b91c1c; }
+
+  .progress-bar-bg {
+    height: 10px; background: #f1f5f9; border-radius: 99px; overflow: hidden; margin-bottom: 8px;
+  }
+  .progress-bar-fill {
+    height: 100%; border-radius: 99px;
+    background: linear-gradient(90deg, var(--indigo), var(--indigo-mid));
+    transition: width .6s ease;
+  }
+  .progress-pct { font-size: 13px; font-weight: 600; color: var(--text-secondary); }
+
+  /* ── RESPONSIVE ─────────────────────────── */
+  @media (max-width: 1024px) {
+    .two-col { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 768px) {
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.open { transform: translateX(0); box-shadow: var(--shadow-lg); }
+    .sidebar-overlay.visible { display: block; }
+    .main { margin-left: 0; }
+    .menu-btn { display: flex; }
+    .topbar { padding: 0 16px; }
+    .topbar-pill { display: none; }
+    .page-body { padding: 16px; }
+    .page-header h1 { font-size: 20px; }
+    .page-header p  { font-size: 14px; }
+
+    .stats-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+    .stat-card { padding: 16px; gap: 12px; }
+    .stat-value { font-size: 20px; }
+    .stat-icon { width: 42px; height: 42px; font-size: 20px; }
+
+    .two-col { grid-template-columns: 1fr; gap: 16px; }
+
+    .trainer-profile-card { flex-direction: column; align-items: flex-start; gap: 14px; }
+
+    .class-stat-item { padding: 16px; }
+    .class-stat-name { font-size: 14px; }
+
+    .syllabus-body { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .btn { width: 100%; justify-content: center; }
+  }
+
+  @media (max-width: 420px) {
+    .stats-grid { gap: 10px; }
+    .stat-value { font-size: 18px; }
+    .stat-card { padding: 14px; }
+  }
+</style>
+
+<!-- SIDEBAR OVERLAY -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<div class="lms-wrap">
+
+  <!-- ── SIDEBAR ──────────────────────────── -->
+  <aside class="sidebar" id="sidebar">
+
+    <div class="sidebar-profile">
+      <div class="profile-avatar-wrap">
+        {% if trainer.trainer_photo %}
+          <img src="{{ trainer.trainer_photo.url }}" alt="{{ trainer.username }}">
         {% else %}
-        <li class="p-2 text-gray-400">
-            📘 Syllabus not available
-        </li>
+          <div class="profile-avatar-initials">{{ trainer.username|slice:":1"|upper }}</div>
         {% endif %}
+        <div class="profile-online-dot"></div>
+      </div>
+      <div class="profile-name">{{ trainer.username }}</div>
+      <div class="profile-role">Trainee · Nexolabs</div>
+      <span class="profile-reg">{{ trainer.trainer_reg_no }}</span>
+    </div>
 
-        <li class="hover:bg-indigo-600 p-2 rounded">Profile</li>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-label">Navigation</div>
 
+      <a href="#" class="sidebar-link active">
+        <span class="s-icon">🏠</span> Dashboard
+      </a>
+      <a href="{% url 'take_attendance' %}" class="sidebar-link">
+        <span class="s-icon">✅</span> Attendance
+      </a>
+      <a href="{% url 'trainee_marks' %}" class="sidebar-link">
+        <span class="s-icon">📝</span> Internal Marks
+      </a>
+      <a href="{% url 'trainee_results' %}" class="sidebar-link">
+        <span class="s-icon">📊</span> Results
+      </a>
+      <a href="{% url 'trainee_assessments' %}" class="sidebar-link">
+        <span class="s-icon">🗒️</span> Assessments
+      </a>
 
-        <li> <a href="{% url 'trainee_missions' %}" class="block p-2 rounded bg-indigo-700"> 🎮 Missions </a> </li>
+      {% if syllabus and syllabus.id %}
+      <a href="{% url 'trainee_syllabus' syllabus.id %}" class="sidebar-link">
+        <span class="s-icon">📘</span> View Syllabus
+      </a>
+      {% else %}
+      <a href="#" class="sidebar-link disabled">
+        <span class="s-icon">📘</span> Syllabus
+      </a>
+      {% endif %}
 
+      <div class="sidebar-section-label" style="margin-top:8px;">Missions</div>
+      <a href="{% url 'trainee_missions' %}" class="sidebar-link mission">
+        <span class="s-icon">🎮</span> Missions
+      </a>
 
-        <li>
-    <a href="{% url 'trainee_assessments' %}">
-        📝 Assessments
-    </a>
-</li>
-    </ul>
-</div>
+      <div class="sidebar-section-label" style="margin-top:8px;">Account</div>
+      <a href="#" class="sidebar-link">
+        <span class="s-icon">👤</span> Profile
+      </a>
+    </nav>
 
-<!-- MAIN -->
-<div class="flex-1 p-6 bg-gray-100">
+    <div class="sidebar-footer">
+      <a href="/logout/" class="logout-btn">
+        <span>🚪</span> Logout
+      </a>
+    </div>
 
-    <h1 class="text-2xl font-bold mb-6">
-        Welcome, {{ trainer.username }}
-    </h1>
+  </aside>
 
-    <!-- PROFILE -->
-    <div class="grid grid-cols-2 gap-6">
+  <!-- ── MAIN ─────────────────────────────── -->
+  <div class="main">
 
-        <div class="bg-white p-6 rounded shadow flex gap-4 items-center">
-            {% if trainer.trainer_photo %}
-                <img src="{{ trainer.trainer_photo.url }}"
-                     class="w-20 h-20 rounded-full border">
-            {% else %}
-                <div class="w-20 h-20 bg-gray-300 rounded-full"></div>
-            {% endif %}
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="menu-btn" onclick="toggleSidebar()" aria-label="Toggle menu">☰</button>
+        <span class="topbar-title">Trainee Panel</span>
+      </div>
+      <div class="topbar-right">
+        <span class="topbar-pill">✦ Nexolabs</span>
+        <a href="/logout/" class="topbar-icon-btn" title="Logout">🚪</a>
+      </div>
+    </header>
 
-            <div>
-                <p class="font-bold">{{ trainer.username }}</p>
-                <p class="text-sm text-gray-500">{{ trainer.trainer_reg_no }}</p>
-                <p class="text-sm">{{ trainer.email }}</p>
+    <!-- PAGE BODY -->
+    <div class="page-body">
+
+      <!-- HEADER -->
+      <div class="page-header">
+        <h1>Welcome, {{ trainer.username }} 👋</h1>
+        <p>Here's your trainee dashboard overview.</p>
+      </div>
+
+      <!-- SUMMARY STATS -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon {% if attendance_today %}icon-green{% else %}icon-red{% endif %}">
+            {% if attendance_today %}✅{% else %}❌{% endif %}
+          </div>
+          <div>
+            <div class="stat-label">Today's Attendance</div>
+            <div class="stat-value" style="font-size:15px;margin-top:6px;{% if attendance_today %}color:var(--green);{% else %}color:var(--red);{% endif %}">
+              {% if attendance_today %}Completed{% else %}Not Taken{% endif %}
             </div>
+          </div>
         </div>
 
-        <div class="bg-white p-6 rounded shadow">
-            <h3 class="font-semibold mb-2">Assigned School</h3>
+        <div class="stat-card">
+          <div class="stat-icon icon-indigo">📋</div>
+          <div>
+            <div class="stat-label">Total Records</div>
+            <div class="stat-value">{{ total_taken }}</div>
+          </div>
+        </div>
+      </div>
 
+      <!-- PROFILE + SCHOOL -->
+      <div class="two-col">
+
+        <!-- TRAINER PROFILE -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">👤 My Profile</div>
+          </div>
+          <div class="trainer-profile-card">
+            <div class="trainer-avatar">
+              {% if trainer.trainer_photo %}
+                <img src="{{ trainer.trainer_photo.url }}" alt="{{ trainer.username }}">
+              {% else %}
+                <div class="trainer-avatar-placeholder">{{ trainer.username|slice:":1"|upper }}</div>
+              {% endif %}
+            </div>
+            <div>
+              <div class="trainer-info-name">{{ trainer.username }}</div>
+              <div class="trainer-info-reg">{{ trainer.trainer_reg_no }}</div>
+              <div class="trainer-info-email">{{ trainer.email }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ASSIGNED SCHOOL -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">🏫 Assigned School</div>
+          </div>
+          <div class="school-card-body">
             {% if school %}
-                <p><strong>Name:</strong> {{ school.name }}</p>
-                <p><strong>Status:</strong> {{ school.status }}</p>
+              <div class="school-name">{{ school.name }}</div>
+              <span class="school-status {% if school.status == 'approved' %}status-approved{% else %}status-pending{% endif %}">
+                {{ school.status|capfirst }}
+              </span>
             {% else %}
-                <p class="text-gray-500">No school assigned</p>
+              <p class="no-school">No school assigned yet.</p>
             {% endif %}
+          </div>
         </div>
 
-    </div>
+      </div>
 
-    <!-- 🔥 SYLLABUS QUICK ACCESS -->
-    <div class="bg-white p-6 rounded shadow mt-6">
-
-        <h3 class="font-bold mb-4">📘 Syllabus Access</h3>
-
-        {% if syllabus and syllabus.allow_for_trainee %}
-            <a href="{% url 'trainee_syllabus' syllabus.id %}"
-               class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded shadow">
-                Open Syllabus
+      <!-- SYLLABUS QUICK ACCESS -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📘 Syllabus Access</div>
+        </div>
+        <div class="syllabus-body">
+          {% if syllabus and syllabus.allow_for_trainee %}
+            <a href="{% url 'trainee_syllabus' syllabus.id %}" class="btn btn-primary">
+              📘 Open Syllabus
             </a>
-
             {% if syllabus.allow_edit_for_trainee %}
-            <p class="text-green-600 text-sm mt-2">
-                ✍️ You can add topics
-            </p>
+              <span class="syllabus-note note-green">✍️ You can add topics</span>
             {% else %}
-            <p class="text-gray-500 text-sm mt-2">
-                👀 View only mode
-            </p>
+              <span class="syllabus-note note-gray">👀 View only mode</span>
             {% endif %}
+          {% else %}
+            <span class="syllabus-note note-red">🚫 Syllabus not allowed by admin</span>
+          {% endif %}
+        </div>
+      </div>
 
-        {% else %}
-            <p class="text-red-500">
-                🚫 Syllabus not allowed by admin
-            </p>
-        {% endif %}
-
-    </div>
-
-    <!-- 🔥 CLASS STATUS -->
-    <div class="bg-white p-6 rounded shadow mt-6">
-
-        <h3 class="font-bold mb-4">📊 Class-wise Attendance Status</h3>
+      <!-- CLASS-WISE ATTENDANCE STATUS -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📊 Class-wise Attendance Status</div>
+        </div>
 
         {% for c in class_stats %}
-        <div class="mb-4 border rounded p-4">
-
-            <div class="flex justify-between items-center mb-2">
-                <h4 class="font-semibold">Class {{ c.class }}</h4>
-
-                {% if c.today_done %}
-                    <span class="text-green-600 font-bold">✅ Done</span>
-                {% else %}
-                    <span class="text-red-500 font-bold">❌ Pending</span>
-                {% endif %}
-            </div>
-
-            <div class="w-full bg-gray-200 rounded h-3 mb-2">
-                <div class="bg-indigo-600 h-3 rounded"
-                     style="width: {{ c.percentage }}%"></div>
-            </div>
-
-            <p class="text-sm text-gray-600">
-                {{ c.percentage }}% Attendance Completed
-            </p>
-
+        <div class="class-stat-item">
+          <div class="class-stat-header">
+            <span class="class-stat-name">Class {{ c.class }}</span>
+            {% if c.today_done %}
+              <span class="done-badge">✅ Done</span>
+            {% else %}
+              <span class="pending-badge">❌ Pending</span>
+            {% endif %}
+          </div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" style="width: {{ c.percentage }}%"></div>
+          </div>
+          <div class="progress-pct">{{ c.percentage }}% Attendance Completed</div>
+        </div>
+        {% empty %}
+        <div style="padding:32px;text-align:center;color:var(--text-muted);font-size:14px;">
+          <span style="font-size:28px;display:block;margin-bottom:8px;">📊</span>
+          No class data available yet
         </div>
         {% endfor %}
+      </div>
 
-    </div>
+    </div><!-- /page-body -->
+  </div><!-- /main -->
 
-    <!-- 🔥 SUMMARY -->
-    <div class="grid grid-cols-2 gap-6 mt-6">
+</div><!-- /lms-wrap -->
 
-        <div class="bg-white p-5 rounded shadow text-center">
-            <p class="text-gray-500 text-sm">Today's Attendance</p>
-
-            {% if attendance_today %}
-                <p class="text-green-600 text-xl font-bold">✅ Completed</p>
-            {% else %}
-                <p class="text-red-500 text-xl font-bold">❌ Not Taken</p>
-            {% endif %}
-        </div>
-
-        <div class="bg-white p-5 rounded shadow text-center">
-            <p class="text-gray-500 text-sm">Total Records</p>
-            <p class="text-xl font-bold">{{ total_taken }}</p>
-        </div>
-
-    </div>
-
-</div>
-```
-
-</div>
+<script>
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('visible');
+  }
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('visible');
+  }
+</script>
 
 {% endblock %}

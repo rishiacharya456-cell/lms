@@ -1,9 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from django.contrib import messages
-from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login
-from django.contrib import messages
 
 
 def role_login(request, role):
@@ -18,12 +15,12 @@ def role_login(request, role):
         # ❌ Invalid credentials
         if user is None:
             messages.error(request, "Invalid username or password")
-            return redirect('role_login', role=role)
+            return redirect('accounts:role_login', role=role)
 
         # ❌ Role mismatch
         if user.role != role:
             messages.error(request, "Invalid role selected")
-            return redirect('role_login', role=role)
+            return redirect('accounts:role_login', role=role)
 
         # ==============================
         # 🔥 SCHOOL ADMIN CHECK
@@ -32,23 +29,23 @@ def role_login(request, role):
 
             if not user.school:
                 messages.error(request, "No school assigned to this account.")
-                return redirect('role_login', role=role)
+                return redirect('accounts:role_login', role=role)
 
             if user.school.status == 'pending':
                 messages.warning(request, "⏳ Your school is under approval.")
-                return redirect('role_login', role=role)
+                return redirect('accounts:role_login', role=role)
 
             if user.school.status == 'rejected':
                 messages.error(request, "❌ Your school request was rejected.")
-                return redirect('role_login', role=role)
+                return redirect('accounts:role_login', role=role)
 
             if user.school.status != 'approved':
                 messages.error(request, "Your school is not approved yet.")
-                return redirect('role_login', role=role)
+                return redirect('accounts:role_login', role=role)
 
             if hasattr(user.school, 'is_active') and not user.school.is_active:
                 messages.error(request, "🚫 Your school is suspended.")
-                return redirect('role_login', role=role)
+                return redirect('accounts:role_login', role=role)
 
         # ==============================
         # 🔥 STUDENT CHECK
@@ -57,52 +54,48 @@ def role_login(request, role):
 
             if not user.school:
                 messages.error(request, "No school assigned.")
-                return redirect('role_login', role=role)
+                return redirect('accounts:role_login', role=role)
 
             if user.school.status != 'approved':
                 messages.error(request, "Your school is not approved yet.")
-                return redirect('role_login', role=role)
+                return redirect('accounts:role_login', role=role)
 
             if hasattr(user, 'is_active_student') and not user.is_active_student:
-                messages.error(request, "Your account is inactive. Contact school.")
-                return redirect('role_login', role=role)
+                messages.error(request, "Your account is inactive.")
+                return redirect('accounts:role_login', role=role)
 
         # ==============================
-        # 🔥 TRAINER CHECK (NEW)
+        # 🔥 TRAINER CHECK
         # ==============================
         if role == 'trainer':
 
             if hasattr(user, 'is_active_trainer') and not user.is_active_trainer:
                 messages.error(request, "Your trainer account is inactive.")
-                return redirect('role_login', role=role)
+                return redirect('accounts:role_login', role=role)
 
         # ==============================
         # ✅ LOGIN USER
         # ==============================
         login(request, user)
 
-        print("LOGIN SUCCESS:", user.username, user.role)
-
         # ==============================
         # 🔁 REDIRECT BASED ON ROLE
         # ==============================
         if role == 'super_admin':
-            return redirect('super_admin')
+            return redirect('dashboard:super_admin')
 
         elif role == 'school_admin':
-            return redirect('school_admin_dashboard')
+            return redirect('dashboard:school_admin_dashboard')
 
         elif role == 'trainer':
-            return redirect('trainee_dashboard')  # ✅ FIXED HERE
+            return redirect('dashboard:trainee_dashboard')
 
         elif role == 'student':
-            return redirect('student_dashboard')
+            return redirect('dashboard:student_dashboard')
 
-        return redirect('/login/')
+        return redirect('accounts:login')
 
     return render(request, 'accounts/login.html', {'role': role})
-
-
 
 from django.shortcuts import render, redirect
 from django.contrib import messages
@@ -344,8 +337,55 @@ def forgot_password(request):
     return render(request, "auth/forgot_password.html")
 
 
+from django.shortcuts import render, get_object_or_404
+from django.contrib.auth import get_user_model
 
-from django.shortcuts import render
+User = get_user_model()
+
 
 def choose_role(request):
     return render(request, 'accounts/choose_role.html')
+
+
+def trainee_detail(request, id):
+    trainee = get_object_or_404(User, id=id, role='trainer')
+    return render(request, 'accounts/trainee_detail.html', {'trainee': trainee})
+
+import qrcode
+from io import BytesIO
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+
+def download_trainee_qr(request, id):
+    trainee = get_object_or_404(User, id=id, role='trainer')
+
+    url = f"https://www.unipick.com.np/verify/trainee/{trainee.id}/"
+
+    qr = qrcode.make(url)
+
+    buffer = BytesIO()
+    qr.save(buffer, format='PNG')
+
+    return HttpResponse(buffer.getvalue(), content_type='image/png')
+
+
+
+from django.shortcuts import redirect
+
+def delete_trainer(request, id):
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+
+    trainee = get_object_or_404(User, id=id, role='trainer')
+    trainee.delete()
+
+    return redirect('dashboard:super_admin')
+
+
+def verify_trainee(request, token):
+    trainee = get_object_or_404(User, qr_token=token, role='trainer')
+    return render(request, 'accounts/verify_trainee.html', {'trainee': trainee})

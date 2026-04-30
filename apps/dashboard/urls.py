@@ -5,11 +5,13 @@ from .views import (
     student_dashboard,
     trainee_dashboard,
     assign_trainer_dashboard,
-    home   # 👈 ADD THIS
+    home
 )
 
+app_name = 'dashboard'   # 🔥 ADD THIS LINE
+
 urlpatterns = [
-    path('', home, name='home'),  # 🔥 THIS FIXES YOUR MAIN PAGE
+    path('', home, name='home'),
 
     path('super-admin/', super_admin_dashboard, name='super_admin'),
     path('school-admin/', school_admin_dashboard, name='school_admin_dashboard'),

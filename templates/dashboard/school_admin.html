@@ -1,281 +1,616 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="flex">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
-    <!-- SIDEBAR -->
-    <div class="w-64 bg-blue-900 text-white min-h-screen p-6">
+  :root {
+    --sidebar-w: 260px;
+    --bg: #f0f2f7;
+    --surface: #ffffff;
+    --border: #e4e8ef;
+    --blue: #2563eb;
+    --blue-dark: #1d4ed8;
+    --blue-light: #eff6ff;
+    --blue-mid: #3b82f6;
+    --indigo: #4f46e5;
+    --green: #10b981;
+    --purple: #9333ea;
+    --orange: #f97316;
+    --red: #ef4444;
+    --text-primary: #0f172a;
+    --text-secondary: #64748b;
+    --text-muted: #94a3b8;
+    --sidebar-bg: #0f172a;
+    --sidebar-text: #94a3b8;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow: 0 4px 16px rgba(0,0,0,0.08);
+    --shadow-lg: 0 12px 40px rgba(0,0,0,0.12);
+    --radius: 14px;
+  }
 
-        <div class="text-center mb-8">
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
-            {% if school.logo %}
-                <img src="{{ school.logo.url }}" 
-                     class="w-20 h-20 mx-auto rounded-full mb-3 border-4 border-white">
-            {% else %}
-                <div class="w-20 h-20 mx-auto bg-white text-blue-900 flex items-center justify-center rounded-full mb-3">
-                    {{ school.name|slice:":1" }}
-                </div>
-            {% endif %}
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+    font-size: 15px;
+  }
 
-            <h2 class="text-lg font-bold">{{ school.name }}</h2>
-            <p class="text-xs text-blue-200">{{ school.address }}</p>
+  .lms-wrap { display: flex; min-height: 100vh; }
 
-        </div>
+  /* ── SIDEBAR ────────────────────────────── */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--sidebar-bg);
+    display: flex; flex-direction: column;
+    position: fixed; top: 0; left: 0;
+    height: 100vh; z-index: 200;
+    transition: transform .3s cubic-bezier(.4,0,.2,1);
+    overflow-y: auto; overflow-x: hidden;
+  }
 
-        <ul class="space-y-3 text-sm">
-            <li>
-                <a href="{% url 'school_admin_dashboard' %}" 
-                   class="block bg-blue-700 p-2 rounded">
-                   Dashboard
-                </a>
-            </li>
+  .sidebar-profile {
+    padding: 28px 20px 20px; text-align: center;
+    border-bottom: 1px solid rgba(255,255,255,.06);
+    background: linear-gradient(160deg, #172554 0%, #0f172a 100%);
+  }
 
-            <li>
-                <a href="{% url 'student_list' %}" 
-                   class="block hover:bg-blue-700 p-2 rounded">
-                   Students
-                </a>
-            </li>
+  .profile-avatar-wrap { position: relative; display: inline-block; margin-bottom: 12px; }
 
-            <!-- ✅ NEW: COURSES -->
-            <li>
-                <a href="{% url 'school_courses' %}" 
-                   class="block hover:bg-blue-700 p-2 rounded">
-                   📚 Courses
-                </a>
-            </li>
+  .profile-avatar-wrap img,
+  .profile-avatar-initials {
+    width: 72px; height: 72px; border-radius: 50%; object-fit: cover;
+    border: 3px solid rgba(59,130,246,.6);
+    box-shadow: 0 0 0 4px rgba(59,130,246,.15);
+  }
+  .profile-avatar-initials {
+    background: linear-gradient(135deg, var(--blue), var(--blue-mid));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px; font-weight: 800; color: #fff;
+  }
 
+  .profile-online-dot {
+    position: absolute; bottom: 3px; right: 3px;
+    width: 14px; height: 14px; background: var(--green);
+    border-radius: 50%; border: 2.5px solid var(--sidebar-bg);
+  }
 
-            <li>
-                <a href="{% url 'school_exam_dashboard' %}"
-   class="block hover:bg-indigo-700 p-2 rounded">
-   📝 Exams
-</a>
-</li>
+  .profile-school-name { font-size: 15px; font-weight: 700; color: #fff; line-height: 1.3; }
+  .profile-address {
+    font-size: 11.5px; color: rgba(148,163,184,.8); margin-top: 4px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .profile-badge {
+    display: inline-block; margin-top: 8px;
+    background: rgba(59,130,246,.2); border: 1px solid rgba(59,130,246,.3);
+    color: #93c5fd; font-size: 11px; font-weight: 600;
+    padding: 3px 10px; border-radius: 20px;
+  }
 
+  .sidebar-section-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 1.2px;
+    text-transform: uppercase; color: rgba(255,255,255,.25);
+    padding: 18px 20px 6px;
+  }
 
-            <li>
-    <a href="{% url 'school_internal_marks' %}" 
-       class="block hover:bg-indigo-600 p-2 rounded">
-       📝 Internal Marks
-    </a>
-</li>
+  .sidebar-nav { padding: 6px 12px; flex: 1; }
 
-            <!-- ✅ NEW: EXAMS -->
-            <!-- RESULTS -->
-<li>
-    <a href="{% url 'school_results' %}" 
-       class="block hover:bg-indigo-600 p-2 rounded">
-       📊 Results
-    </a>
-</li>
+  .sidebar-link {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border-radius: 10px;
+    font-size: 13.5px; font-weight: 500;
+    color: var(--sidebar-text); text-decoration: none;
+    transition: all .18s ease; margin-bottom: 2px;
+  }
+  .sidebar-link .s-icon {
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 8px; font-size: 15px;
+    background: rgba(255,255,255,.04); flex-shrink: 0; transition: all .18s;
+  }
+  .sidebar-link:hover { color: #fff; background: rgba(255,255,255,.06); }
+  .sidebar-link:hover .s-icon { background: rgba(255,255,255,.1); }
+  .sidebar-link.active { color: #fff; background: rgba(37,99,235,.3); }
+  .sidebar-link.active .s-icon { background: var(--blue); box-shadow: 0 3px 10px rgba(37,99,235,.5); }
+  .sidebar-link.disabled { color: rgba(148,163,184,.35); pointer-events: none; cursor: not-allowed; }
+  .sidebar-link.disabled .s-icon { opacity: .35; }
 
-<!-- 🔥 EXISTING -->
-<li>
-    <a href="{% url 'school_attendance' %}" 
-       class="block hover:bg-blue-700 p-2 rounded">
-       📊 Attendance
-    </a>
+  .sidebar-link.mission {
+    background: rgba(139,92,246,.2); border: 1px solid rgba(139,92,246,.3);
+    color: #c4b5fd; margin-bottom: 4px;
+  }
+  .sidebar-link.mission:hover { background: rgba(139,92,246,.35); color: #fff; }
+  .sidebar-link.mission .s-icon { background: rgba(139,92,246,.3); }
 
+  .sidebar-footer { padding: 16px 12px; border-top: 1px solid rgba(255,255,255,.06); }
+  .logout-btn {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px; border-radius: 10px;
+    font-size: 13.5px; font-weight: 600;
+    color: #fca5a5; text-decoration: none;
+    background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.15);
+    transition: all .18s; width: 100%;
+  }
+  .logout-btn:hover { background: rgba(239,68,68,.18); color: #fff; }
 
-</li>
+  /* ── OVERLAY ────────────────────────────── */
+  .sidebar-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,.55); z-index: 190; backdrop-filter: blur(3px);
+  }
 
-<li>
-<a href="{% if syllabus %}{% url 'school_syllabus' syllabus.id %}{% else %}#{% endif %}"
-   class="block p-2 rounded
-   {% if syllabus %}
-       hover:bg-indigo-700 text-white
-   {% else %}
-       text-gray-400 cursor-not-allowed
-   {% endif %}">
-    📘 School Syllabus
-</a>
-</li>
+  /* ── MAIN ───────────────────────────────── */
+  .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
 
-<li>
-    <a href="{% url 'school_missions' %}"
-       class="block p-2 rounded hover:bg-indigo-700 text-white">
+  /* ── TOPBAR ─────────────────────────────── */
+  .topbar {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 0 28px; height: 64px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100; gap: 16px;
+  }
+  .topbar-left { display: flex; align-items: center; gap: 14px; }
+  .menu-btn {
+    display: none; background: none; border: none; cursor: pointer;
+    padding: 7px; border-radius: 8px; color: var(--text-secondary);
+    font-size: 22px; line-height: 1; transition: background .15s;
+  }
+  .menu-btn:hover { background: var(--bg); }
+  .topbar-title { font-size: 16px; font-weight: 700; color: var(--text-primary); }
+  .topbar-right { display: flex; align-items: center; gap: 10px; }
+  .topbar-pill {
+    background: var(--blue-light); color: var(--blue);
+    font-size: 12px; font-weight: 600;
+    padding: 5px 13px; border-radius: 20px; white-space: nowrap;
+  }
+  .topbar-icon-btn {
+    width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--bg); border-radius: 10px; cursor: pointer;
+    font-size: 16px; border: 1px solid var(--border);
+    transition: all .15s; text-decoration: none; color: var(--text-primary);
+  }
+  .topbar-icon-btn:hover { background: var(--blue-light); border-color: var(--blue); }
 
-        📊 Mission Dashboard
-        <p class="text-sm text-gray-400">Student Tasks</p>
+  /* ── PAGE BODY ──────────────────────────── */
+  .page-body { padding: 28px; flex: 1; }
 
-    </a>
-</li>
+  .page-header {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    margin-bottom: 24px; gap: 16px; flex-wrap: wrap;
+  }
+  .page-header h1 { font-size: 22px; font-weight: 800; color: var(--text-primary); letter-spacing: -.4px; }
+  .page-header p  { font-size: 14px; color: var(--text-secondary); margin-top: 3px; }
+  .header-school-info { text-align: right; }
+  .header-school-name { font-size: 15px; font-weight: 700; color: var(--text-primary); }
+  .header-school-role { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
 
-<li>
-    <a href="{% url 'school_assessments' %}">
-        📊 Assessments
-    </a>
-</li>
+  /* ── STATS ──────────────────────────────── */
+  .stats-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 16px; margin-bottom: 24px;
+  }
+  .stat-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px 18px;
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow .2s, transform .2s;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .stat-card:hover { box-shadow: var(--shadow); transform: translateY(-2px); }
+  .stat-icon {
+    width: 48px; height: 48px; border-radius: 13px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; flex-shrink: 0;
+  }
+  .icon-blue   { background: var(--blue-light); }
+  .icon-green  { background: #dcfce7; }
+  .icon-purple { background: #f3e8ff; }
+  .icon-orange { background: #fff7ed; }
+  .stat-label { font-size: 11.5px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .6px; }
+  .stat-value {
+    font-size: 26px; font-weight: 800; letter-spacing: -1px;
+    margin-top: 4px; font-family: 'JetBrains Mono', monospace;
+  }
+  .val-blue   { color: var(--blue); }
+  .val-green  { color: var(--green); }
+  .val-purple { color: var(--purple); }
+  .val-orange { color: var(--orange); }
 
-        </ul>
+  /* ── CARD ───────────────────────────────── */
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); box-shadow: var(--shadow-sm);
+    overflow: hidden; margin-bottom: 20px;
+  }
+  .card-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 22px; border-bottom: 1px solid var(--border);
+  }
+  .card-title { font-size: 15px; font-weight: 700; color: var(--text-primary); }
+  .card-link {
+    font-size: 12.5px; font-weight: 600; color: var(--blue);
+    text-decoration: none; padding: 5px 12px;
+    background: var(--blue-light); border-radius: 20px; transition: all .15s;
+    white-space: nowrap;
+  }
+  .card-link:hover { background: var(--blue); color: #fff; }
 
+  /* ── ATTENDANCE CARD ────────────────────── */
+  .att-card-body { padding: 20px 22px; }
+  .att-permission {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 14px; font-weight: 500; padding: 10px 16px;
+    border-radius: 10px;
+  }
+  .att-edit   { background: #dcfce7; color: #15803d; }
+  .att-view   { background: #f1f5f9; color: var(--text-secondary); }
+
+  /* ── QUICK ACTIONS ──────────────────────── */
+  .actions-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 10px 20px; border-radius: 10px;
+    font-size: 14px; font-weight: 600; text-decoration: none;
+    transition: all .18s; border: none; cursor: pointer; white-space: nowrap;
+  }
+  .btn-blue   { background: var(--blue); color: #fff; box-shadow: 0 3px 10px rgba(37,99,235,.3); }
+  .btn-blue:hover { background: var(--blue-dark); transform: translateY(-1px); box-shadow: 0 5px 18px rgba(37,99,235,.4); }
+  .btn-green  { background: var(--green); color: #fff; box-shadow: 0 3px 10px rgba(16,185,129,.3); }
+  .btn-green:hover { background: #059669; transform: translateY(-1px); }
+  .btn-dark   { background: var(--text-primary); color: #fff; }
+  .btn-dark:hover { background: #1e293b; transform: translateY(-1px); }
+
+  /* ── TABLE ──────────────────────────────── */
+  .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .data-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .data-table thead tr { background: #f8fafc; }
+  .data-table th {
+    padding: 12px 16px; text-align: left;
+    font-size: 11px; font-weight: 700; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: .7px; white-space: nowrap;
+  }
+  .data-table td {
+    padding: 13px 16px; vertical-align: middle;
+    border-top: 1px solid #f1f5f9; color: var(--text-primary); font-size: 14px;
+  }
+  .data-table tbody tr { transition: background .12s; }
+  .data-table tbody tr:hover { background: #fafbff; }
+
+  .avatar { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; }
+  .avatar-placeholder {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700; color: var(--blue);
+  }
+  .reg-no {
+    font-family: 'JetBrains Mono', monospace; font-size: 12.5px; font-weight: 500;
+    color: var(--blue); background: var(--blue-light);
+    padding: 3px 8px; border-radius: 6px; white-space: nowrap;
+  }
+  .badge {
+    display: inline-block; font-size: 11.5px; font-weight: 600;
+    padding: 3px 10px; border-radius: 20px; white-space: nowrap;
+  }
+  .badge-blue   { background: var(--blue-light); color: var(--blue); }
+  .badge-gray   { background: #f1f5f9; color: #64748b; }
+
+  .empty-state {
+    text-align: center; padding: 40px 20px;
+    color: var(--text-muted); font-size: 14px;
+  }
+  .empty-state span { font-size: 28px; display: block; margin-bottom: 8px; }
+
+  /* ── MOBILE CARDS ───────────────────────── */
+  .mobile-cards { display: none; }
+  .mobile-card-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 18px; border-top: 1px solid #f1f5f9;
+    transition: background .12s; text-decoration: none; color: inherit;
+    cursor: pointer;
+  }
+  .mobile-card-item:first-child { border-top: none; }
+  .mobile-card-item:active { background: #fafbff; }
+  .mobile-card-info { flex: 1; min-width: 0; }
+  .mobile-card-name {
+    font-size: 15px; font-weight: 600; color: var(--text-primary);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .mobile-card-sub {
+    font-size: 13px; color: var(--text-secondary);
+    margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .mobile-card-right { flex-shrink: 0; text-align: right; }
+  .mobile-chevron { color: var(--text-muted); font-size: 16px; margin-left: 4px; }
+
+  /* ── RESPONSIVE ─────────────────────────── */
+  @media (max-width: 1100px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 768px) {
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.open { transform: translateX(0); box-shadow: var(--shadow-lg); }
+    .sidebar-overlay.visible { display: block; }
+    .main { margin-left: 0; }
+    .menu-btn { display: flex; }
+    .topbar { padding: 0 16px; }
+    .topbar-pill { display: none; }
+    .page-body { padding: 16px; }
+
+    .page-header { flex-direction: column; gap: 4px; }
+    .page-header h1 { font-size: 20px; }
+    .header-school-info { text-align: left; }
+
+    .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 16px; }
+    .stat-card { padding: 16px 14px; gap: 12px; }
+    .stat-value { font-size: 22px; }
+    .stat-icon { width: 42px; height: 42px; font-size: 20px; }
+    .stat-label { font-size: 11px; }
+
+    .actions-row { gap: 10px; }
+    .btn { flex: 1; justify-content: center; padding: 11px 12px; font-size: 13.5px; }
+
+    .desktop-table { display: none; }
+    .mobile-cards { display: block; }
+  }
+
+  @media (max-width: 420px) {
+    .stats-grid { gap: 10px; }
+    .stat-value { font-size: 20px; }
+    .stat-card { padding: 14px 12px; }
+  }
+</style>
+
+<!-- SIDEBAR OVERLAY -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<div class="lms-wrap">
+
+  <!-- ── SIDEBAR ──────────────────────────── -->
+  <aside class="sidebar" id="sidebar">
+
+    <div class="sidebar-profile">
+      <div class="profile-avatar-wrap">
+        {% if school.logo %}
+          <img src="{{ school.logo.url }}" alt="{{ school.name }}">
+        {% else %}
+          <div class="profile-avatar-initials">{{ school.name|slice:":1" }}</div>
+        {% endif %}
+        <div class="profile-online-dot"></div>
+      </div>
+      <div class="profile-school-name">{{ school.name }}</div>
+      <div class="profile-address">{{ school.address }}</div>
+      <span class="profile-badge">School Admin</span>
     </div>
 
-    <!-- MAIN -->
-    <div class="flex-1 p-6 bg-gray-100">
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-label">Main Menu</div>
 
-        <!-- HEADER -->
-        <div class="flex justify-between items-center mb-6">
+      <a href="{% url 'dashboard:school_admin_dashboard' %}" class="sidebar-link active">
+        <span class="s-icon">🏠</span> Dashboard
+      </a>
+      <a href="{% url 'accounts:student_list' %}" class="sidebar-link">
+        <span class="s-icon">👨‍🎓</span> Students
+      </a>
+      <a href="{% url 'school_courses' %}" class="sidebar-link">
+        <span class="s-icon">📚</span> Courses
+      </a>
+      <a href="{% url 'school_exam_dashboard' %}" class="sidebar-link">
+        <span class="s-icon">📝</span> Exams
+      </a>
+      <a href="{% url 'school_internal_marks' %}" class="sidebar-link">
+        <span class="s-icon">🗒️</span> Internal Marks
+      </a>
+      <a href="{% url 'school_results' %}" class="sidebar-link">
+        <span class="s-icon">📊</span> Results
+      </a>
+      <a href="{% url 'school_attendance' %}" class="sidebar-link">
+        <span class="s-icon">✅</span> Attendance
+      </a>
 
-            <div>
-                <h1 class="text-2xl font-bold">Dashboard</h1>
-                <p class="text-gray-600">
-                    Welcome back, {{ request.user.username }}
-                </p>
-            </div>
+      <a href="{% if syllabus %}{% url 'school_syllabus' syllabus.id %}{% else %}#{% endif %}"
+         class="sidebar-link {% if not syllabus %}disabled{% endif %}">
+        <span class="s-icon">📘</span> School Syllabus
+      </a>
 
-            <div class="text-right">
-                <p class="font-semibold">{{ school.name }}</p>
-                <p class="text-sm text-gray-500">School Admin</p>
-            </div>
+      <div class="sidebar-section-label" style="margin-top:8px;">More</div>
 
-        </div>
+      <a href="{% url 'school_missions' %}" class="sidebar-link mission">
+        <span class="s-icon">🎮</span> Mission Dashboard
+      </a>
+      <a href="{% url 'school_assessments' %}" class="sidebar-link">
+        <span class="s-icon">📋</span> Assessments
+      </a>
+    </nav>
 
-        <!-- STATS -->
-        <div class="grid grid-cols-4 gap-6 mb-6">
-
-            <div class="bg-white p-5 rounded-xl shadow">
-                <h3 class="text-gray-500">Students</h3>
-                <p class="text-3xl font-bold text-blue-600">{{ students_count }}</p>
-            </div>
-
-            <div class="bg-white p-5 rounded-xl shadow">
-                <h3 class="text-gray-500">Trainers</h3>
-                <p class="text-3xl font-bold text-green-600">{{ trainers_count }}</p>
-            </div>
-
-            <div class="bg-white p-5 rounded-xl shadow">
-                <h3 class="text-gray-500">Courses</h3>
-                <p class="text-3xl font-bold text-purple-600">{{ courses_count }}</p>
-            </div>
-
-            <div class="bg-white p-5 rounded-xl shadow">
-                <h3 class="text-gray-500">Active</h3>
-                <p class="text-3xl font-bold text-orange-500">{{ students_count }}</p>
-            </div>
-
-        </div>
-
-        <!-- 🔥 ADDED ATTENDANCE SECTION (NEW) -->
-        <div class="bg-white p-5 rounded-xl shadow mb-6">
-
-            <div class="flex justify-between items-center mb-3">
-                <h2 class="font-bold text-lg">📊 Attendance</h2>
-
-                <a href="{% url 'school_attendance' %}" 
-                   class="text-blue-600 text-sm hover:underline">
-                   View Full Report
-                </a>
-            </div>
-
-            {% if school.school_can_edit %}
-                <p class="text-green-600 text-sm">
-                    ✏️ You can edit attendance (Allowed by Super Admin)
-                </p>
-            {% else %}
-                <p class="text-gray-500 text-sm">
-                    🔒 View only mode
-                </p>
-            {% endif %}
-
-        </div>
-
-        <!-- QUICK ACTIONS -->
-        <div class="mb-6">
-
-            <h2 class="font-bold mb-3 text-lg">Quick Actions</h2>
-
-            <div class="flex gap-4">
-
-                <a href="{% url 'add_student' %}" 
-                   class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700">
-                    ➕ Add Student
-                </a>
-
-                <a href="#" 
-                   class="bg-green-600 text-white px-5 py-2 rounded-lg hover:bg-green-700">
-                    📚 Assign Course
-                </a>
-
-                <a href="{% url 'student_list' %}" 
-                   class="bg-gray-800 text-white px-5 py-2 rounded-lg hover:bg-gray-900">
-                    👁 View Students
-                </a>
-
-            </div>
-
-        </div>
-
-        <!-- RECENT STUDENTS -->
-        <div class="bg-white p-5 rounded-xl shadow">
-
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="font-bold text-lg">Recent Students</h2>
-
-                <a href="{% url 'student_list' %}" 
-                   class="text-blue-600 text-sm hover:underline">
-                    View All
-                </a>
-            </div>
-
-            <table class="w-full text-sm border-collapse">
-
-                <thead class="bg-gray-100 text-gray-600">
-                    <tr>
-                        <th class="p-3 text-left">Photo</th>
-                        <th class="text-left">Reg No</th>
-                        <th class="text-left">Name</th>
-                        <th class="text-center">Class</th>
-                        <th class="text-center">Section</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    {% for student in recent_students %}
-                    <tr class="border-t hover:bg-gray-100 transition">
-
-                        <td class="p-3">
-                            {% if student.photo %}
-                                <img src="{{ student.photo.url }}" 
-                                     class="w-11 h-11 rounded-full object-cover border">
-                            {% else %}
-                                <div class="w-11 h-11 bg-gray-300 rounded-full"></div>
-                            {% endif %}
-                        </td>
-
-                        <td class="font-semibold text-gray-800 tracking-wide">
-                            {{ student.username }}
-                        </td>
-
-                        <td class="font-medium text-gray-700">
-                            {{ student.first_name }}
-                        </td>
-
-                        <td class="text-center font-medium">
-                            {{ student.student_class }}
-                        </td>
-
-                        <td class="text-center font-medium">
-                            {{ student.section }}
-                        </td>
-
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="5" class="text-center p-5 text-gray-500">
-                            No students yet
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-
-            </table>
-
-        </div>
-
+    <div class="sidebar-footer">
+      <a href="/logout/" class="logout-btn">
+        <span>🚪</span> Logout
+      </a>
     </div>
 
-</div>
+  </aside>
+
+  <!-- ── MAIN ─────────────────────────────── -->
+  <div class="main">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="menu-btn" onclick="toggleSidebar()" aria-label="Toggle menu">☰</button>
+        <span class="topbar-title">School Dashboard</span>
+      </div>
+      <div class="topbar-right">
+        <span class="topbar-pill">✦ School Admin</span>
+        <a href="/logout/" class="topbar-icon-btn" title="Logout">🚪</a>
+      </div>
+    </header>
+
+    <!-- PAGE BODY -->
+    <div class="page-body">
+
+      <!-- HEADER -->
+      <div class="page-header">
+        <div>
+          <h1>Dashboard 👋</h1>
+          <p>Welcome back, {{ request.user.username }}</p>
+        </div>
+        <div class="header-school-info">
+          <div class="header-school-name">{{ school.name }}</div>
+          <div class="header-school-role">School Administrator</div>
+        </div>
+      </div>
+
+      <!-- STATS -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon icon-blue">👨‍🎓</div>
+          <div>
+            <div class="stat-label">Students</div>
+            <div class="stat-value val-blue">{{ students_count }}</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon icon-green">🧑‍🏫</div>
+          <div>
+            <div class="stat-label">Trainers</div>
+            <div class="stat-value val-green">{{ trainers_count }}</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon icon-purple">📚</div>
+          <div>
+            <div class="stat-label">Courses</div>
+            <div class="stat-value val-purple">{{ courses_count }}</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon icon-orange">⚡</div>
+          <div>
+            <div class="stat-label">Active</div>
+            <div class="stat-value val-orange">{{ students_count }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ATTENDANCE CARD -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📊 Attendance</div>
+          <a href="{% url 'school_attendance' %}" class="card-link">View Full Report →</a>
+        </div>
+        <div class="att-card-body">
+          {% if school.school_can_edit %}
+            <span class="att-permission att-edit">✏️ You can edit attendance (Allowed by Super Admin)</span>
+          {% else %}
+            <span class="att-permission att-view">🔒 View only mode</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- QUICK ACTIONS -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">⚡ Quick Actions</div>
+        </div>
+        <div style="padding:18px 22px;">
+          <div class="actions-row">
+            <a href="{% url 'accounts:add_student' %}" class="btn btn-blue">➕ Add Student</a>
+            <a href="#" class="btn btn-green">📚 Assign Course</a>
+            <a href="{% url 'accounts:student_list' %}" class="btn btn-dark">👁 View Students</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- RECENT STUDENTS -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">👨‍🎓 Recent Students</div>
+          <a href="{% url 'accounts:student_list' %}" class="card-link">View All →</a>
+        </div>
+
+        <!-- Desktop Table -->
+        <div class="table-wrap desktop-table">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Photo</th>
+                <th>Reg No</th>
+                <th>Name</th>
+                <th>Class</th>
+                <th>Section</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for student in recent_students %}
+              <tr>
+                <td>
+                  {% if student.photo %}
+                    <img src="{{ student.photo.url }}" class="avatar" alt="">
+                  {% else %}
+                    <div class="avatar-placeholder">{{ student.first_name|first|upper }}</div>
+                  {% endif %}
+                </td>
+                <td><span class="reg-no">{{ student.username }}</span></td>
+                <td style="font-weight:600;">{{ student.first_name }}</td>
+                <td><span class="badge badge-blue">{{ student.student_class }}</span></td>
+                <td><span class="badge badge-gray">{{ student.section }}</span></td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="5">
+                  <div class="empty-state"><span>👤</span>No students yet</div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Mobile Cards -->
+        <div class="mobile-cards">
+          {% for student in recent_students %}
+          <div class="mobile-card-item">
+            {% if student.photo %}
+              <img src="{{ student.photo.url }}" class="avatar" alt="">
+            {% else %}
+              <div class="avatar-placeholder">{{ student.first_name|first|upper }}</div>
+            {% endif %}
+            <div class="mobile-card-info">
+              <div class="mobile-card-name">{{ student.first_name }}</div>
+              <div class="mobile-card-sub">Class {{ student.student_class }} · Section {{ student.section }}</div>
+            </div>
+            <div class="mobile-card-right">
+              <span class="reg-no">{{ student.username }}</span>
+            </div>
+            <span class="mobile-chevron">›</span>
+          </div>
+          {% empty %}
+          <div class="empty-state"><span>👤</span>No students yet</div>
+          {% endfor %}
+        </div>
+
+      </div><!-- /card -->
+
+    </div><!-- /page-body -->
+  </div><!-- /main -->
+
+</div><!-- /lms-wrap -->
+
+<script>
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('visible');
+  }
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('visible');
+  }
+</script>
 
 {% endblock %}
