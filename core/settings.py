@@ -123,3 +123,11 @@ LOGOUT_REDIRECT_URL = '/login/'
 
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+ALLOWED_HOSTS = [
+    'unipick.com.np',
+    'www.unipick.com.np',
+    '43.204.233.23',
+    'localhost',
+    '127.0.0.1'
+]
